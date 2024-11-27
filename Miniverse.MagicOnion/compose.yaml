@@ -1,0 +1,6 @@
+﻿services:
+  miniverse.magiconion:
+    image: miniverse.magiconion
+    build:
+      context: .
+      dockerfile: Miniverse.MagicOnion/Dockerfile
