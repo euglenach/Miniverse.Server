@@ -1,0 +1,6 @@
+﻿services:
+  miniverse.logiclooper:
+    image: miniverse.logiclooper
+    build:
+      context: .
+      dockerfile: Miniverse.LogicLooper/Dockerfile

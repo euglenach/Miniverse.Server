@@ -1,0 +1,6 @@
+﻿services:
+  miniverse.nats:
+    image: miniverse.nats
+    build:
+      context: .
+      dockerfile: Miniverse.Nats/Dockerfile
