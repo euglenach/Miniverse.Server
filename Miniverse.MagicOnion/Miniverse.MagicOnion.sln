@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miniverse.ServerShared", "..\Miniverse.ServerShared\Miniverse.ServerShared\Miniverse.ServerShared.csproj", "{87611B7D-6EA0-4CCB-8A70-24B516A541B5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniverseShared", "..\..\Miniverse.Shared\MiniverseShared\MiniverseShared\MiniverseShared.csproj", "{F2685F6E-3004-42F2-A0F3-EE063A89A36B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,5 +25,9 @@ Global
 		{87611B7D-6EA0-4CCB-8A70-24B516A541B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87611B7D-6EA0-4CCB-8A70-24B516A541B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87611B7D-6EA0-4CCB-8A70-24B516A541B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2685F6E-3004-42F2-A0F3-EE063A89A36B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2685F6E-3004-42F2-A0F3-EE063A89A36B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2685F6E-3004-42F2-A0F3-EE063A89A36B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2685F6E-3004-42F2-A0F3-EE063A89A36B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

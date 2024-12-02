@@ -21,10 +21,13 @@
       <PackageReference Include="MessagePack" Version="2.5.192" />
       <PackageReference Include="MessagePack.UnityShims" Version="2.5.192" />
       <PackageReference Include="NATS.Net" Version="2.5.4" />
+      <PackageReference Include="Ulid" Version="1.3.4" />
+      <PackageReference Include="Ulid.MessagePack" Version="1.3.4" />
       <PackageReference Include="ZLogger" Version="2.5.8" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\Miniverse.Shared\MiniverseShared\MiniverseShared\MiniverseShared.csproj" />
       <ProjectReference Include="..\..\Miniverse.ServerShared\Miniverse.ServerShared\Miniverse.ServerShared.csproj" />
     </ItemGroup>
 
