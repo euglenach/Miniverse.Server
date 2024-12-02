@@ -13,12 +13,12 @@ public class NatsPubSub : IAsyncDisposable
 {
     private static NatsConnectionPool? connectionPool;
     
-    public async ValueTask ConnectAsync(IServiceCollection serviceCollection)
+    public void Initialize(string url)
     {
-        serviceCollection.AddNats();
         var options = NatsOpts.Default with
         {
-            SerializerRegistry = NatsMessagePackSerializerRegistry.Default
+            Url = string.IsNullOrEmpty(url)? NatsOpts.Default.Url : url,
+            SerializerRegistry = NatsMessagePackSerializerRegistry.Default,
         };
         
         connectionPool = new NatsConnectionPool(options);
