@@ -1,12 +1,13 @@
 ﻿using MagicOnion.Server.Hubs;
 using Microsoft.Extensions.Logging;
+using Miniverse.ServerShared.Nats;
 using MiniverseShared.MessagePackObjects;
 using MiniverseShared.StreamingHubs;
 using ZLogger;
 
 namespace Miniverse.MagicOnion.StreamingHubs;
 
-public class MatchingHub(ILogger<MatchingHub> logger) : StreamingHubBase<IMatchingHub, IMatchingReceiver>, IMatchingHub
+public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : StreamingHubBase<IMatchingHub, IMatchingReceiver>, IMatchingHub
 {
     private Player player;
     
@@ -14,5 +15,6 @@ public class MatchingHub(ILogger<MatchingHub> logger) : StreamingHubBase<IMatchi
     {
         this.player = player;
         logger.ZLogInformation($"Joining matching hub... RoomUlid:{roomUlid} Player:{player.Ulid}");
+        await nats.Publish("LL", "LLLL");
     }
 }
