@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		compose.yaml = compose.yaml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miniverse.ServerShared", "..\Miniverse.ServerShared\Miniverse.ServerShared\Miniverse.ServerShared.csproj", "{C59845BF-900C-49AB-82CD-CC17C86CA50E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,5 +19,9 @@ Global
 		{856FD75D-F081-47E5-8DBF-A53A2E54A038}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{856FD75D-F081-47E5-8DBF-A53A2E54A038}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{856FD75D-F081-47E5-8DBF-A53A2E54A038}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C59845BF-900C-49AB-82CD-CC17C86CA50E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C59845BF-900C-49AB-82CD-CC17C86CA50E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C59845BF-900C-49AB-82CD-CC17C86CA50E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C59845BF-900C-49AB-82CD-CC17C86CA50E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
