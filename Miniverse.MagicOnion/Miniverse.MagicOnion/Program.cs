@@ -1,4 +1,4 @@
-﻿// https://github.com/Cysharp/MagicOnion?tab=readme-ov-file#quick-start
+// https://github.com/Cysharp/MagicOnion?tab=readme-ov-file#quick-start
 
 using MagicOnion;
 using Microsoft.AspNetCore.Builder;
@@ -35,5 +35,7 @@ app.MapMagicOnionService();
 
 var natsPubSub = app.Services.GetRequiredService<NatsPubSub>();
 natsPubSub.Initialize(""); // todo: url設定
+
+app.MapGet("/", () => "Hello World!");
 
 await app.RunAsync();

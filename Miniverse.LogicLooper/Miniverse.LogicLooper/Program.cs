@@ -1,6 +1,6 @@
-﻿// https://github.com/Cysharp/LogicLooper/blob/master/samples/LoopHostingApp/Program.cs
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
 
-Console.WriteLine("Hello, World!");
+app.MapGet("/", () => "Hello World!");
 
-
-Console.WriteLine("Hello, LogicLooper!");
+app.Run();
