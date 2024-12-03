@@ -20,6 +20,8 @@ public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Streami
         logger.ZLogInformation($"Joining matching hub... RoomUlid:{roomUlid} Player:{player.Ulid}");
         
         // ブロードキャスト
-        Broadcast(room).OnJoin();
+        // Broadcast(room).OnJoin();
+
+        await nats.Publish("LL", "LLLLL");
     }
 }
