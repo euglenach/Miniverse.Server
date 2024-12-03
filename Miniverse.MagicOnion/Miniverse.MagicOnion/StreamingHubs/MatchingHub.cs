@@ -6,7 +6,7 @@ using ZLogger;
 
 namespace Miniverse.MagicOnion.StreamingHubs;
 
-public class MatchingHub(ILogger logger) : StreamingHubBase<IMatchingHub, IMatchingReceiver>, IMatchingHub
+public class MatchingHub(ILogger<MatchingHub> logger) : StreamingHubBase<IMatchingHub, IMatchingReceiver>, IMatchingHub
 {
     private Player player;
     
