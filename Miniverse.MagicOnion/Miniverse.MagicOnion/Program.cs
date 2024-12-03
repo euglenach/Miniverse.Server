@@ -38,4 +38,4 @@ natsPubSub.Initialize(""); // todo: url設定
 
 app.MapGet("/", () => "Hello World!");
 
-await app.RunAsync();
+app.Run();
