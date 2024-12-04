@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miniverse.ServiceDiscovery", "Miniverse.ServiceDiscovery\Miniverse.ServiceDiscovery.csproj", "{B345C213-406E-4981-A3E7-B2B1850A1053}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2351277E-18A2-43ED-A046-8862D322832D}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniverseShared", "..\..\Miniverse.Shared\MiniverseShared\MiniverseShared\MiniverseShared.csproj", "{0A54F83A-6DD0-4277-A867-EA3CAE4657C4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B345C213-406E-4981-A3E7-B2B1850A1053}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B345C213-406E-4981-A3E7-B2B1850A1053}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B345C213-406E-4981-A3E7-B2B1850A1053}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B345C213-406E-4981-A3E7-B2B1850A1053}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A54F83A-6DD0-4277-A867-EA3CAE4657C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A54F83A-6DD0-4277-A867-EA3CAE4657C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A54F83A-6DD0-4277-A867-EA3CAE4657C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A54F83A-6DD0-4277-A867-EA3CAE4657C4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

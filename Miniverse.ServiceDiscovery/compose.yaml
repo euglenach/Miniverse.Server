@@ -1,0 +1,6 @@
+﻿services:
+  miniverse.servicediscovery:
+    image: miniverse.servicediscovery
+    build:
+      context: .
+      dockerfile: Miniverse.ServiceDiscovery/Dockerfile
