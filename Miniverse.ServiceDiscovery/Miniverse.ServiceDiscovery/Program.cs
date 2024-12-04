@@ -36,7 +36,7 @@ else
     app.UseHsts();
 }
 
-app.UseHttpsRedirection(); // HTTPSリダイレクト
+// app.UseHttpsRedirection(); // HTTPSリダイレクト
 app.UseStaticFiles();      // 静的ファイルのサポート
 
 app.UseRouting();          // ルーティングを有効化
