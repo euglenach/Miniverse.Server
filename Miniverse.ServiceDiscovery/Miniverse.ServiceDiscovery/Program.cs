@@ -47,6 +47,4 @@ app.UseEndpoints(endpoints =>
     endpoints?.MapControllers(); // 属性ルーティングを有効化
 });
 
-app.MapGet("/", () => new MagicOnionURLResponse("http://localhost:5000"));
-
 app.Run();
