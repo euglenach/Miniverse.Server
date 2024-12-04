@@ -10,6 +10,6 @@ namespace Miniverse.ServiceDiscovery;
 // [ApiController]
 public class MagicOnionServiceDiscoveryController(IMagicOnionURLResolver urlResolver) : Controller
 {
-    [HttpGet]
+    [HttpGet(nameof(GetUrl))]
     public ActionResult<MagicOnionURLResponse> GetUrl() => new MagicOnionURLResponse(urlResolver.Resolve());
 }
