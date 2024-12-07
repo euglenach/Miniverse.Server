@@ -3,7 +3,7 @@ using MessagePack;
 using MessagePack.Resolvers;
 using MessagePack.Unity;
 
-namespace Miniverse.MagicOnion;
+namespace Miniverse.ServerShared;
 
 public static class MessagePackOptionRegister
 {

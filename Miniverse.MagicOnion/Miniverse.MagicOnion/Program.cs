@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Miniverse.MagicOnion;
+using Miniverse.ServerShared;
 using Miniverse.ServerShared.Nats;
 using NATS.Client.Hosting;
 using ZLogger;

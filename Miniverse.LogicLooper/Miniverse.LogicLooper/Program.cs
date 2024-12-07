@@ -5,6 +5,7 @@ using ZLogger;
 
 //github.com/Cysharp/LogicLooper/blob/master/samples/LoopHostingApp/Program.cs
 
+MessagePackOptionRegister.Register();
 
 var build = CreateHostBuilder(args).Build();
 
