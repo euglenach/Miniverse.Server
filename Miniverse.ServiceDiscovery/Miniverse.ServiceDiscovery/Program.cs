@@ -19,7 +19,6 @@ builder.Services.AddMvc()
        {
            option.OutputFormatters.Clear();
            option.InputFormatters.Clear();
-           option.FormatterMappings.SetMediaTypeMappingForFormat("msgpack", "application/x-msgpack");
            option.OutputFormatters.Add(new MessagePackOutputFormatter(ContractlessStandardResolver.Options));
            option.InputFormatters.Add(new MessagePackInputFormatter(ContractlessStandardResolver.Options));
        });
