@@ -24,16 +24,16 @@ public class NatsPubSub : IAsyncDisposable
         connectionPool = new NatsConnectionPool(options);
     }
 
-    public async ValueTask Publish<T>(string roomUlid, T value)
+    public async ValueTask Publish<T>(string key, T value)
     {
         if(connectionPool is null) throw new InvalidOperationException("No connection pool available.");
-        await connectionPool.GetConnection().PublishAsync(roomUlid, value);
+        await connectionPool.GetConnection().PublishAsync(key, value);
     }
 
-    public IAsyncEnumerable<NatsMsg<T>> Subscribe<T>(string roomUlid)
+    public IAsyncEnumerable<NatsMsg<T>> Subscribe<T>(string key)
     {
         if(connectionPool is null) throw new InvalidOperationException("No connection pool available.");
-        return connectionPool.GetConnection().SubscribeAsync<T>(roomUlid);
+        return connectionPool.GetConnection().SubscribeAsync<T>(key);
     }
 
     public async ValueTask DisposeAsync()

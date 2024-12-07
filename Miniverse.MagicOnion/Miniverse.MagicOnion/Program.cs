@@ -34,8 +34,6 @@ var app = builder.Build();
 app.MapMagicOnionService();
 
 var natsPubSub = app.Services.GetRequiredService<NatsPubSub>();
-natsPubSub.Initialize("demo.nats.io"); // todo: url設定
-
-app.MapGet("/", () => "Hello World!");
+natsPubSub.Initialize("localhost:4222"); // todo: url設定
 
 app.Run();

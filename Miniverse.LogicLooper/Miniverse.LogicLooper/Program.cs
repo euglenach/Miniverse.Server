@@ -9,7 +9,7 @@ var build = CreateHostBuilder(args).Build();
 
 var nats = build.Services.GetRequiredService<NatsPubSub>();
 var receiver = build.Services.GetRequiredService<NatsReceiver>();
-nats.Initialize("demo.nats.io");
+nats.Initialize("localhost:4222");
 
 _ = receiver.StartSubscribe();
 
