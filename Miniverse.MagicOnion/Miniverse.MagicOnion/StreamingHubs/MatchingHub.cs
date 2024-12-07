@@ -9,19 +9,20 @@ namespace Miniverse.MagicOnion.StreamingHubs;
 
 public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : StreamingHubBase<IMatchingHub, IMatchingReceiver>, IMatchingHub
 {
-    private Player player;
     IGroup room;
-    // private IInMemoryStorage<Player> players;
-    
-    public async ValueTask JoinAsync(Player player, Ulid roomUlid)
-    {
-        (room, _) = await Group.AddAsync(roomUlid.ToString(), player);
-        this.player = player;
-        logger.ZLogInformation($"Joining matching hub... RoomUlid:{roomUlid} Player:{player.Ulid}");
-        
-        // ブロードキャスト
-        // Broadcast(room).OnJoin();
+    private Player player;
+    private string roomUlid;
 
-        await nats.Publish("LL", "LLLLL");
+    public async ValueTask CreateRoomAsync(Player player)
+    {
+        this.roomUlid = Ulid.NewUlid().ToString();
+        this.player = player; 
+        this.room = await Group.AddAsync(player.Ulid.ToString());
+        logger.ZLogInformation($"Joining matching hub... Player:{player.Ulid}: roomUlid:{roomUlid}");
+
+        
+        // natsで部屋を生成したことをLogicLooperに投げたい
+        await nats.Publish("LL", roomUlid);
     }
 }
+
