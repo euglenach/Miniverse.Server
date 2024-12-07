@@ -1,11 +1,12 @@
 ﻿using System.Collections.Concurrent;
 using Cysharp.Threading;
+using Miniverse.ServerShared;
 
 namespace Miniverse.LogicLooper;
 
 public class LifeGameLoop
 {
-    private readonly ILogger logger;
+    private readonly ILogger logger = LogManager.GetLogger<LifeGameLoop>();
     public static ConcurrentBag<LifeGameLoop> All { get; } = new();
     
     /// <summary>
@@ -13,16 +14,14 @@ public class LifeGameLoop
     /// </summary>
     /// <param name="looperPool"></param>
     /// <param name="logger"></param>
-    public static void CreateNew(ILogicLooperPool looperPool, ILogger logger)
+    public static void CreateNew(ILogicLooperPool looperPool)
     {
-        var gameLoop = new LifeGameLoop(logger);
+        var gameLoop = new LifeGameLoop();
         looperPool.RegisterActionAsync(gameLoop.UpdateFrame);
     }
     
-    private LifeGameLoop(ILogger logger)
+    private LifeGameLoop()
     {
-        logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            
         // Id = Interlocked.Increment(ref _gameLoopSeq);
         // World = new World(64, 64);
         // World.SetPattern(Patterns.GliderGun, 10, 10);
@@ -34,7 +33,7 @@ public class LifeGameLoop
     
     public bool UpdateFrame(in LogicLooperActionContext ctx)
     {
-        logger.LogInformation("Looper Update");
+        // logger.LogInformation("Looper Update");
         
         if (ctx.CancellationToken.IsCancellationRequested)
         {

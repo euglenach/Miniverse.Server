@@ -21,7 +21,7 @@ public class LoopHostedService(ILogicLooperPool looperPool, ILogger<LoopHostedSe
 
         // Example: Create a new world of life-game and register it into the loop.
         //   - See also: LoopHostingApp/Pages/Index.cshtml.cs
-        LifeGameLoop.CreateNew(looperPool, logger);
+        LifeGameLoop.CreateNew(looperPool);
 
         logger.LogInformation($"LoopHostedService is started. (Loopers={looperPool.Loopers.Count}; TargetFrameRate={looperPool.Loopers[0].TargetFrameRate:0}fps)");
 
