@@ -35,7 +35,15 @@ static IHostBuilder CreateHostBuilder(string[] args) =>
         .ConfigureLogging(logging =>
         {
             logging.ClearProviders();
-            logging.AddZLoggerConsole().SetMinimumLevel(LogLevel.Debug);
+            logging.AddZLoggerConsole(options =>
+            {
+                options.UsePlainTextFormatter(formatter =>
+                {
+                    // 2023-12-19 02:46:14.289 [DBG]......
+                    formatter.SetPrefixFormatter($"{0:local-longdate} [{1:short}] ", (in MessageTemplate template, in LogInfo info) =>
+                                                     template.Format(info.Timestamp, info.LogLevel));
+                });
+            }).SetMinimumLevel(LogLevel.Debug);
         })
         .ConfigureWebHostDefaults(webBuilder =>
         {
