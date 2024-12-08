@@ -1,4 +1,5 @@
 using Miniverse.LogicLooper;
+using Miniverse.LogicLooperServer;
 using Miniverse.ServerShared;
 using Miniverse.ServerShared.Nats;
 using ZLogger;
@@ -11,12 +12,14 @@ var build = CreateHostBuilder(args).Build();
 
 var nats = build.Services.GetRequiredService<NatsPubSub>();
 var receiver = build.Services.GetRequiredService<NatsReceiver>();
+var matchingReceiver = build.Services.GetRequiredService<MatchingReceiver>();
 
 LogManager.SetGlobalLoggerFactory(build.Services);
 
 nats.Initialize("localhost:4222");
 
 _ = receiver.StartSubscribe();
+_ = matchingReceiver.StartSubscribe();
 
 build.Run();
 return;
@@ -31,6 +34,7 @@ static IHostBuilder CreateHostBuilder(string[] args) =>
             });
             
             AppLifetimeScope.Configure(services);
+            MajorityGameLifetimeScope.Configure(services);
         })
         .ConfigureLogging(logging =>
         {
@@ -44,8 +48,4 @@ static IHostBuilder CreateHostBuilder(string[] args) =>
                                                      template.Format(info.Timestamp, info.LogLevel));
                 });
             }).SetMinimumLevel(LogLevel.Debug);
-        })
-        .ConfigureWebHostDefaults(webBuilder =>
-        {
-            webBuilder.UseStartup<Startup>();
         });

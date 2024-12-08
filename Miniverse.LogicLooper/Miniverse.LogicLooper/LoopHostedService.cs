@@ -1,6 +1,7 @@
 ﻿using Cysharp.Threading;
+using Miniverse.LogicLooper;
 
-namespace Miniverse.LogicLooper;
+namespace Miniverse.LogicLooperServer;
 
 public class LoopHostedService(ILogicLooperPool looperPool, ILogger<LoopHostedService> logger) : IHostedService
 {

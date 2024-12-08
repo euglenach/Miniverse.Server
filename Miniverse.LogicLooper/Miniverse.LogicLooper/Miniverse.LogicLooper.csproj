@@ -37,4 +37,8 @@
       <ProjectReference Include="..\..\Miniverse.ServerShared\Miniverse.ServerShared\Miniverse.ServerShared.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Utility\" />
+    </ItemGroup>
+
 </Project>
