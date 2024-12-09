@@ -3,4 +3,4 @@
     image: miniverse.nats
     build:
       context: .
-      dockerfile: Miniverse.Nats/Dockerfile
+      dockerfile: Dockerfile
