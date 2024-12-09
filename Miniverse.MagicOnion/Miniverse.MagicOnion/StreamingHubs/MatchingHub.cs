@@ -4,6 +4,7 @@ using Miniverse.ServerShared.Nats;
 using Miniverse.ServerShared.NatsMessage;
 using MiniverseShared.MessagePackObjects;
 using MiniverseShared.StreamingHubs;
+using R3;
 using ZLogger;
 
 namespace Miniverse.MagicOnion.StreamingHubs;
@@ -13,6 +14,9 @@ public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Streami
     private IGroup? room;
     private Player? player;
     private Ulid roomUlid;
+    private NatsPubSub nats{get;} = nats;
+    private ILogger<MatchingHub> logger{get;} = logger;
+    private readonly CancellationTokenSource cancellation = new();
 
     public async ValueTask CreateRoomAsync(Player player)
     {
@@ -24,6 +28,7 @@ public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Streami
         
         // natsで部屋を生成したことをLogicLooperに投げたい
         await nats.Publish(new CreateRoomMsg(roomUlid, player));
+        SubscribeFromNatsMessage();
     }
 
     public async ValueTask JoinRoomAsync(Ulid roomUlid, Player player)
@@ -36,7 +41,36 @@ public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Streami
         logger.ZLogInformation($"Joining matching hub... Player:{player.Ulid}: roomUlid:{roomUlid}");
         
         // natsで部屋を生成したことをLogicLooperに投げたい
-        await nats.Publish(new JoinRoomMsg(roomUlid, player));
+        await nats.Publish(roomUlid.ToString(), new JoinRoomMsg(roomUlid, player));
+        SubscribeFromNatsMessage();
+    }
+
+    private void SubscribeFromNatsMessage()
+    {
+        // BroadcastToSelfでOnJoinをクライアントに流す
+        Observable.CreateFrom(this, static (token, state) => state.nats.Subscribe<OnJoinMsg>(state.roomUlid.ToString(), token))
+            .Subscribe(this, (msg, state) =>
+            {
+                if(msg.Player.Ulid == state.player!.Ulid) return;
+                state.BroadcastToSelf(state.room!).OnJoin(msg.Player);
+                state.logger.ZLogInformation($"Joined room:{state.roomUlid} player:{msg.Player}");
+            }).RegisterTo(cancellation.Token);
+        
+        // BroadcastToSelfでOnJoinをクライアントに流す
+        Observable.CreateFrom(this, static (token, state) => state.nats.Subscribe<OnJoinSelfMsg>(state.roomUlid.ToString(), token))
+                  .Subscribe(this, (msg, state) =>
+                  {
+                      if(msg.Player.Ulid != state.player!.Ulid) return;
+                      state.BroadcastToSelf(state.room!).OnJoinSelf(msg.RoomInfo);
+                      state.logger.ZLogInformation($"Joined room:{state.roomUlid} player:{msg.Player}");
+                  }).RegisterTo(cancellation.Token);
+    }
+
+    protected override ValueTask OnDisconnected()
+    {
+        cancellation.Cancel();
+        cancellation.Dispose();
+        return ValueTask.CompletedTask;
     }
 }
 

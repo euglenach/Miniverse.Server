@@ -24,29 +24,29 @@ public class NatsPubSub : IAsyncDisposable
         connectionPool = new NatsConnectionPool(options);
     }
 
-    public ValueTask Publish<T>(string key, T value)
+    public ValueTask Publish<T>(string key, T value, CancellationToken cancellationToken = default)
     {
         if(connectionPool is null) throw new InvalidOperationException("No connection pool available.");
-        return connectionPool.GetConnection().PublishAsync(key, value);
+        return connectionPool.GetConnection().PublishAsync(key, value, cancellationToken : cancellationToken);
     }
     
-    public ValueTask Publish<T>(T value)
+    public ValueTask Publish<T>(T value, CancellationToken cancellationToken = default)
     {
-        return Publish(typeof(T).FullName!, value);
+        return Publish(typeof(T).FullName!, value, cancellationToken);
     }
 
-    public async IAsyncEnumerable<T> Subscribe<T>(string key)
+    public async IAsyncEnumerable<T> Subscribe<T>(string key, CancellationToken cancellationToken = default)
     {
         if(connectionPool is null) throw new InvalidOperationException("No connection pool available.");
-        await foreach(var msg in connectionPool.GetConnection().SubscribeAsync<T>(key))
+        await foreach(var msg in connectionPool.GetConnection().SubscribeAsync<T>(key, cancellationToken : cancellationToken))
         {
             yield return msg.Data!;
         }
     }
     
-    public IAsyncEnumerable<T> Subscribe<T>()
+    public IAsyncEnumerable<T> Subscribe<T>(CancellationToken cancellationToken = default)
     {
-        return Subscribe<T>(typeof(T).FullName!);
+        return Subscribe<T>(typeof(T).FullName!, cancellationToken);
     }
 
     public async ValueTask DisposeAsync()

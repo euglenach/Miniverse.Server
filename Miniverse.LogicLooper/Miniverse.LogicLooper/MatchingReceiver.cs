@@ -18,12 +18,6 @@ public class MatchingReceiver(NatsPubSub nats, MajorityGameRoomManager roomManag
             var (manager, token) = x;
             await manager.CreateRoomAsync(msg.RoomUlid, msg.Player, token);
         } ).AddTo(this.disposable);
-        
-        nats.Subscribe<JoinRoomMsg>().ToObservable().Subscribe((roomManager, cancellation.Token), static async (msg, x) =>
-        {
-            var (manager, token) = x;
-            await manager.JoinRoomAsync(msg.RoomUlid, msg.Player, token);
-        } ).AddTo(this.disposable);
     }
 
     public void Dispose()
