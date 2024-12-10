@@ -26,4 +26,8 @@ services:
       context: ..
       dockerfile: Miniverse.Server/Miniverse.MagicOnion/Miniverse.MagicOnion/Dockerfile
     ports:
-      - "5209:5209"        
+      - "5209:5209"
+    environment:
+      - 
+#    volumes:
+#      - ./Miniverse.Server/Miniverse.MagicOnion/Miniverse.MagicOnion/appsettings.json:app/appsettings.json
