@@ -45,10 +45,10 @@ public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Streami
         SubscribeFromNatsMessage();
     }
 
-    private void SubscribeFromNatsMessage()
+    private async ValueTask SubscribeFromNatsMessage()
     {
         // BroadcastToSelfでOnJoinをクライアントに流す
-        Observable.CreateFrom(this, static (token, state) => state.nats.Subscribe<OnJoinMsg>(state.roomUlid.ToString(), token))
+        nats.Subscribe<OnJoinSelfMsg>().ToObservable()
             .Subscribe(this, (msg, state) =>
             {
                 if(msg.Player.Ulid == state.player!.Ulid) return;
@@ -57,7 +57,7 @@ public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Streami
             }).RegisterTo(cancellation.Token);
         
         // BroadcastToSelfでOnJoinをクライアントに流す
-        Observable.CreateFrom(this, static (token, state) => state.nats.Subscribe<OnJoinSelfMsg>(state.roomUlid.ToString(), token))
+        nats.Subscribe<OnJoinSelfMsg>().ToObservable()
                   .Subscribe(this, (msg, state) =>
                   {
                       if(msg.Player.Ulid != state.player!.Ulid) return;

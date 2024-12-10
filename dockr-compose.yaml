@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:  
+  nats-server:
+    image: nats:latest
+    container_name: nats-server
+    ports:
+      - "4222:4222" # NATSクライアントポート
+      - "8222:8222" # HTTP管理ポート
+      - "6222:6222" # クラスター通信ポート
+    tty: true
+    
+  miniverse.logiclooper:
+    image: miniverse.logiclooper
+    container_name: "Miniverse.LogicLooper"
+    build:
+      context: ..
+      dockerfile: Miniverse.Server/Miniverse.LogicLooper/Miniverse.LogicLooper/Dockerfile
+    ports:
+      - "7149:7149"
+  
+  miniverse.magiconion:
+    image: miniverse.magiconion
+    container_name: "Miniverse.MagicOnion"
+    build:
+      context: ..
+      dockerfile: Miniverse.Server/Miniverse.MagicOnion/Miniverse.MagicOnion/Dockerfile
+    ports:
+      - "5209:5209"        
