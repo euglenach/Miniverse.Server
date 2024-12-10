@@ -20,6 +20,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddZLoggerConsole().SetMinimumLevel(LogLevel.Debug);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddZLoggerConsole(options =>
+{
+    options.UsePlainTextFormatter(formatter =>
+    {
+        formatter.SetPrefixFormatter($"{0:local-longdate} [{1:short}] ", (in MessageTemplate template, in LogInfo info) =>
+                                         template.Format(info.Timestamp, info.LogLevel));
+    });
+}).SetMinimumLevel(LogLevel.Debug);
+
 // DI
 AppLifetimeScope.Configure(builder.Services);
 
@@ -29,12 +39,22 @@ builder.WebHost.UseKestrel(options =>
     {
         endpoint.Protocols = HttpProtocols.Http2;
     });
+    if(Environment.GetEnvironmentVariable("PORT") is {} port && int.TryParse(port, out var result))
+    {
+        options.ListenAnyIP(result);
+    }
 });
 
 var app = builder.Build();
 app.MapMagicOnionService();
 
 var natsPubSub = app.Services.GetRequiredService<NatsPubSub>();
-natsPubSub.Initialize("localhost:4222"); // todo: url設定
+
+var natsAddress = "localhost:4222";
+if(Environment.GetEnvironmentVariable("NATS_ADDRESS") is {} address)
+{
+    natsAddress = address;
+}
+natsPubSub.Initialize(natsAddress);
 
 app.Run();

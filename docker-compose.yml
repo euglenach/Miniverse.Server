@@ -18,6 +18,9 @@ services:
       dockerfile: Miniverse.Server/Miniverse.LogicLooper/Miniverse.LogicLooper/Dockerfile
     ports:
       - "7149:7149"
+    environment:
+      PORT: "7149"
+      NATS_ADDRESS: "nats-server:4222"
   
   miniverse.magiconion:
     image: miniverse.magiconion
@@ -28,6 +31,17 @@ services:
     ports:
       - "5209:5209"
     environment:
-      - 
-#    volumes:
-#      - ./Miniverse.Server/Miniverse.MagicOnion/Miniverse.MagicOnion/appsettings.json:app/appsettings.json
+      PORT: "5209"
+      NATS_ADDRESS: "nats-server:4222"
+      
+  miniverse.magiconion2:
+    image: miniverse.magiconion
+    container_name: "Miniverse.MagicOnion2"
+    build:
+      context: ..
+      dockerfile: Miniverse.Server/Miniverse.MagicOnion/Miniverse.MagicOnion/Dockerfile
+    ports:
+      - "5210:5210"
+    environment:
+      PORT: "5210"
+      NATS_ADDRESS: "nats-server:4222"

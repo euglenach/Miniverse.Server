@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miniverse.LogicLooper", "..\Miniverse.LogicLooper\Miniverse.LogicLooper\Miniverse.LogicLooper.csproj", "{22E80243-74BA-4C6F-88BE-C3220992C8CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miniverse.MagicOnion", "..\Miniverse.MagicOnion\Miniverse.MagicOnion\Miniverse.MagicOnion.csproj", "{D28EA47A-3509-414D-B92D-9B63D38F3180}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miniverse.ServerShared", "..\Miniverse.ServerShared\Miniverse.ServerShared\Miniverse.ServerShared.csproj", "{89D05CFB-109A-4253-9C3A-C4A89918F7E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniverseShared", "..\..\Miniverse.Shared\MiniverseShared\MiniverseShared\MiniverseShared.csproj", "{80FBA0E8-F102-4CBC-B8AD-78EB7B07FF49}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miniverse.ServiceDiscovery", "..\Miniverse.ServiceDiscovery\Miniverse.ServiceDiscovery\Miniverse.ServiceDiscovery.csproj", "{64643AA4-E75F-4E58-8AE6-E9C543F35633}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{22E80243-74BA-4C6F-88BE-C3220992C8CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22E80243-74BA-4C6F-88BE-C3220992C8CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22E80243-74BA-4C6F-88BE-C3220992C8CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22E80243-74BA-4C6F-88BE-C3220992C8CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D28EA47A-3509-414D-B92D-9B63D38F3180}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D28EA47A-3509-414D-B92D-9B63D38F3180}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D28EA47A-3509-414D-B92D-9B63D38F3180}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D28EA47A-3509-414D-B92D-9B63D38F3180}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89D05CFB-109A-4253-9C3A-C4A89918F7E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89D05CFB-109A-4253-9C3A-C4A89918F7E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89D05CFB-109A-4253-9C3A-C4A89918F7E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89D05CFB-109A-4253-9C3A-C4A89918F7E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80FBA0E8-F102-4CBC-B8AD-78EB7B07FF49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80FBA0E8-F102-4CBC-B8AD-78EB7B07FF49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80FBA0E8-F102-4CBC-B8AD-78EB7B07FF49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80FBA0E8-F102-4CBC-B8AD-78EB7B07FF49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64643AA4-E75F-4E58-8AE6-E9C543F35633}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64643AA4-E75F-4E58-8AE6-E9C543F35633}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64643AA4-E75F-4E58-8AE6-E9C543F35633}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64643AA4-E75F-4E58-8AE6-E9C543F35633}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
