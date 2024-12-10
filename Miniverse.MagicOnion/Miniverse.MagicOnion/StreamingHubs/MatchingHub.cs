@@ -28,7 +28,7 @@ public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Streami
         
         // natsで部屋を生成したことをLogicLooperに投げたい
         await nats.Publish(new CreateRoomMsg(roomUlid, player));
-        SubscribeFromNatsMessage();
+        SubscribeFromNatsMessage(roomUlid);
     }
 
     public async ValueTask JoinRoomAsync(Ulid roomUlid, Player player)
@@ -42,13 +42,13 @@ public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Streami
         
         // natsで部屋を生成したことをLogicLooperに投げたい
         await nats.Publish(roomUlid.ToString(), new JoinRoomMsg(roomUlid, player));
-        SubscribeFromNatsMessage();
+        SubscribeFromNatsMessage(roomUlid);
     }
 
-    private async ValueTask SubscribeFromNatsMessage()
+    private async ValueTask SubscribeFromNatsMessage(Ulid roomUild)
     {
         // BroadcastToSelfでOnJoinをクライアントに流す
-        nats.Subscribe<OnJoinSelfMsg>().ToObservable()
+        nats.Subscribe<OnJoinSelfMsg>(roomUild.ToString()).ToObservable()
             .Subscribe(this, (msg, state) =>
             {
                 if(msg.Player.Ulid == state.player!.Ulid) return;
@@ -57,7 +57,7 @@ public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Streami
             }).RegisterTo(cancellation.Token);
         
         // BroadcastToSelfでOnJoinをクライアントに流す
-        nats.Subscribe<OnJoinSelfMsg>().ToObservable()
+        nats.Subscribe<OnJoinSelfMsg>(roomUild.ToString()).ToObservable()
                   .Subscribe(this, (msg, state) =>
                   {
                       if(msg.Player.Ulid != state.player!.Ulid) return;

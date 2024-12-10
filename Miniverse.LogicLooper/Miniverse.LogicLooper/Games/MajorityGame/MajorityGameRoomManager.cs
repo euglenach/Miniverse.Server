@@ -34,12 +34,6 @@ public class MajorityGameRoomManager(ILogicLooperPool looperPool, ILogger<Majori
         
         // LogicLooperに部屋のUpdateを追加
         _ = looperPool.RegisterActionAsync(room.Update, option);
-        
-        // この部屋の入室通知を購読
-        nats.Subscribe<JoinRoomMsg>(roomUlid.ToString()).ToObservable().Subscribe(this, static async (msg, state) =>
-        {
-            await state.JoinRoomAsync(msg.RoomUlid, msg.Player);
-        }).AddTo(this.disposable);
     }
 
     public async ValueTask JoinRoomAsync(Ulid roomUlid, Player player, CancellationToken token = default)

@@ -18,5 +18,7 @@ public class AppLifetimeScope
         services.AddSingleton<NatsReceiver>();
         services.AddSingleton<MatchingReceiver>();
         services.AddSingleton<MajorityGameRoomManager>();
+        
+        MajorityGameLifetimeScope.Configure(services);
     }
 }
