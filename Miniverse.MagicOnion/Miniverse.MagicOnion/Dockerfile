@@ -8,7 +8,7 @@ EXPOSE 5209
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Miniverse.MagicOnion/Miniverse.MagicOnion.csproj", "Miniverse.MagicOnion/"]
+COPY ["Miniverse.Server/Miniverse.MagicOnion/Miniverse.MagicOnion/Miniverse.MagicOnion.csproj", "Miniverse.MagicOnion/"]
 RUN dotnet restore "Miniverse.MagicOnion/Miniverse.MagicOnion.csproj"
 COPY . .
 WORKDIR "/src/Miniverse.MagicOnion"

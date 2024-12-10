@@ -8,7 +8,7 @@ EXPOSE 7149
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Miniverse.LogicLooper/Miniverse.LogicLooper.csproj", "Miniverse.LogicLooper/"]
+COPY ["Miniverse.Server/Miniverse.LogicLooper/Miniverse.LogicLooper/Miniverse.LogicLooper.csproj", "Miniverse.LogicLooper/"]
 RUN dotnet restore "Miniverse.LogicLooper/Miniverse.LogicLooper.csproj"
 COPY . .
 WORKDIR "/src/Miniverse.LogicLooper"
