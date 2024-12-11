@@ -22,13 +22,14 @@ public class MajorityGameHub
 
     #region ReceiverEvent
     
+    public Observable<Unit> OnConnected => receiver.OnConnected;
     public Observable<MajorityGameQuestion> OnAskedQuestion => receiver.OnAskedQuestion;
     public Observable<(Ulid AnswerPlayerUlid, int Index)> OnSelected => receiver.OnSelected;
     public Observable<MajorityGameResult> OnResult => receiver.OnResult;
 
     #endregion
 
-    public async ValueTask AskQuestion(string questionText, string[] choices)
+    public async ValueTask AskQuestion(string questionText, params string[] choices)
     {
         await hub.AskQuestion(questionText, choices);
     }
@@ -43,8 +44,6 @@ public class MajorityGameHub
         await hub.ResultOpen();
     } 
     
-    
-    
     public static async ValueTask<MajorityGameHub> CreateAsync(Player player, Ulid roomUlid, CancellationToken cancellationToken = default)
     {
         var receiver = new MajorityGameReceiver();
@@ -54,10 +53,16 @@ public class MajorityGameHub
 
     private class MajorityGameReceiver : IMajorityGameReceiver
     {
+        public readonly Subject<Unit> OnConnected = new();
         public readonly Subject<MajorityGameQuestion> OnAskedQuestion = new();
         public readonly Subject<(Ulid AnswerPlayerUlid, int Index)> OnSelected = new();
         public readonly Subject<MajorityGameResult> OnResult = new();
-        
+
+        void IMajorityGameReceiver.OnConnected()
+        {
+            OnConnected.OnNext(Unit.Default);
+        }
+
         void IMajorityGameReceiver.OnAskedQuestion(MajorityGameQuestion question)
         {
             OnAskedQuestion.OnNext(question);

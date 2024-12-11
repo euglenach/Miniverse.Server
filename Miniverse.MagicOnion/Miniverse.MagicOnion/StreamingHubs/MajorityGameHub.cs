@@ -42,6 +42,7 @@ public class MajorityGameHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Str
         nats.Subscribe<OnAskedQuestionMsg>(roomUlid.ToString()).ToObservable()
             .Subscribe(this, static (msg, state) =>
             {
+                if(msg.Question is null) return;
                 state.BroadcastToSelf(state.room!).OnAskedQuestion(msg.Question);
             }).RegisterTo(cancellation.Token);
         
@@ -49,6 +50,8 @@ public class MajorityGameHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Str
         nats.Subscribe<OnSelectedMsg>(roomUlid.ToString()).ToObservable()
             .Subscribe(this, static (msg, state) =>
             {
+                if(msg.TargetUlid == Ulid.Empty || msg.SelectedPlayerUlid == Ulid.Empty) return;
+                
                 // 質問者にしか返さない
                 if(msg.TargetUlid != state.playerUlid) return;
                 state.BroadcastToSelf(state.room!).OnSelected(msg.SelectedPlayerUlid, msg.Index);
@@ -58,6 +61,7 @@ public class MajorityGameHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Str
         nats.Subscribe<OnResultMsg>(roomUlid.ToString()).ToObservable()
             .Subscribe(this, static (msg, state) =>
             {
+                if(msg.Result is null) return;
                 state.BroadcastToSelf(state.room!).OnResult(msg.Result);
             }).RegisterTo(cancellation.Token);
     }
@@ -75,6 +79,7 @@ public class MajorityGameHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Str
     {
         EventSubscribe();
         this.room = await Group.AddAsync(playerUlid.ToString());
+        BroadcastToSelf(room!).OnConnected();
     }
     
     protected override ValueTask OnDisconnected()

@@ -1,5 +1,7 @@
 ﻿using FluentAssertions;
 using Miniverse.CLIClient.Utility;
+using MiniverseShared.Utility;
+using R3;
 using ValueTaskSupplement;
 using ZLogger;
 
@@ -9,6 +11,8 @@ public class MajorityGame
 {
     public async ValueTask Run(CancellationToken cancellationToken = default)
     {
+        using var disposables = new CompositeDisposable();
+        
         LogManager.Global.ZLogInformation($"Start MajorityGame CLI...");
         
         var playerNum = 4;
@@ -18,6 +22,7 @@ public class MajorityGame
         for(var i = 0; i < majorityGamePayers.Length; i++)
         {
             var player = new MajorityGamePayer(i);
+            disposables.Add(player);
             majorityGamePayers[i] = player;
             // 初期化。MagicOnionの接続をしたり
             await player.ConnectMatchingAsync(cancellationToken);
@@ -53,7 +58,41 @@ public class MajorityGame
         await ValueTaskEx.WhenAll(
             majorityGamePayers.Select(x => x.ConnectGameAsync(cancellationToken))
             );
+        (await Wait.Until(() => majorityGamePayers.All(p => p.IsConnectedMajorityGame), cancellationToken : cancellationToken)).Should().BeTrue();
         
+        // ここからマジョリティゲーム。プログラムで直接シナリオを書く
         
+        // 質問開始
+        var choices = new[]{"犬", "猫", "うさぎ", "虚無"};
+        await host.MajorityGameHub.AskQuestion("飼うなら？", choices);
+        
+        // 全員に質問がくるか確認
+        (await Wait.Until(() => majorityGamePayers.All(p => p.RoomInfo!.Question is not null), cancellationToken : cancellationToken)).Should().BeTrue();
+
+        foreach(var guest in guests)
+        {
+            // ランダムで1つ選択させる
+            await guest.MajorityGameHub.Select(Random.Shared.Next(choices.Length));
+            
+            // ホストだけに届く通知を待機
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(2000);
+            await host.MajorityGameHub.OnSelected.Where(guest, static (x, g) => x.AnswerPlayerUlid == g.Player.Ulid)
+                      .FirstAsync(cts.Token);
+        }
+
+        // ちょっと待ってから結果発表
+        await Task.Delay(2000, cancellationToken);
+        host.MajorityGameHub.ResultOpen().Forget();
+        
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(2000);
+        
+        // リザルトが来るのを待つ
+        await ValueTaskEx.WhenAll(
+            majorityGamePayers.Select(p => p.MajorityGameHub.OnResult.FirstAsync(timeout.Token).AsValueTask())
+        );
+        
+        LogManager.Global.ZLogInformation($"Complete MajorityGame!!");
     }
 }

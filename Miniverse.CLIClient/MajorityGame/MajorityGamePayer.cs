@@ -9,22 +9,24 @@ namespace Miniverse.CLIClient;
 
 public class MajorityGamePayer : IDisposable
 {
-    private readonly Player player;
+    public Player Player{get;}
+
     public MatchingHub MatchingHub{get; private set;}
     public MajorityGameHub MajorityGameHub{get; private set;}
     public MajorityGameRoomInfo? RoomInfo{get;private set;}
     private readonly CompositeDisposable disposable = new();
     private readonly ILogger<MajorityGamePayer> logger;
+    public bool IsConnectedMajorityGame { get; private set; }
     
     public MajorityGamePayer(int index)
     {
-        player = new(Ulid.NewUlid(), $"CliClient{(index == 0? "Host" : "Guest")}Player{index}");
+        Player = new(Ulid.NewUlid(), $"CliClient{(index == 0? "Host" : "Guest")}Player{index}");
         logger = LoggerFactory.Create(logging =>
         {
             logging.SetMinimumLevel(LogLevel.Debug);
             logging.AddZLoggerConsole(options => options.UsePlainTextFormatter(formatter => 
                 formatter.SetPrefixFormatter($"{0:timeonly} [{1:short}] [{2:short}] ",
-                                             (in MessageTemplate template, in LogInfo info) => template.Format(info.Timestamp, info.LogLevel, player.Ulid.ToString()))));
+                                             (in MessageTemplate template, in LogInfo info) => template.Format(info.Timestamp, info.LogLevel, Player.Ulid.ToString()))));
         }).CreateLogger<MajorityGamePayer>();
     }
 
@@ -33,7 +35,7 @@ public class MajorityGamePayer : IDisposable
     /// </summary>
     public async ValueTask ConnectMatchingAsync(CancellationToken cancellationToken = default)
     {
-        MatchingHub = await MatchingHub.CreateAsync(player);
+        MatchingHub = await MatchingHub.CreateAsync(Player);
         MatchingEventSubscribe();
     }
 
@@ -42,7 +44,7 @@ public class MajorityGamePayer : IDisposable
     /// </summary>
     public async ValueTask ConnectGameAsync(CancellationToken cancellationToken = default)
     {
-        MajorityGameHub = await MajorityGameHub.CreateAsync(player, RoomInfo.Ulid, cancellationToken);
+        MajorityGameHub = await MajorityGameHub.CreateAsync(Player, RoomInfo.Ulid, cancellationToken);
         MajorityGameEventSubscribe();
     }
     
@@ -51,7 +53,7 @@ public class MajorityGamePayer : IDisposable
         MatchingHub.OnJoinSelf.Subscribe(this, static (roomInfo, state) =>
         {
             state.RoomInfo = roomInfo;
-            state.logger.ZLogInformation($"{nameof(MatchingHub.OnJoinSelf)}: room:{roomInfo.Ulid} me:{state.player.Name}");
+            state.logger.ZLogInformation($"{nameof(MatchingHub.OnJoinSelf)}: room:{roomInfo.Ulid} me:{state.Player.Name}");
         }).AddTo(disposable);
         
         MatchingHub.OnJoin.Subscribe(this, static (player, state) =>
@@ -65,6 +67,12 @@ public class MajorityGamePayer : IDisposable
 
     void MajorityGameEventSubscribe()
     {
+        // OnConnectedのイベント購読
+        MajorityGameHub.OnConnected.Subscribe(this, (_, state) =>
+        {
+            state.IsConnectedMajorityGame = true;
+        }).AddTo(disposable);
+        
         // OnAskedQuestionのイベント購読
         MajorityGameHub.OnAskedQuestion.Subscribe(this, (x, state) =>
         {
@@ -81,16 +89,15 @@ public class MajorityGamePayer : IDisposable
         {
             // (質問者だけに飛んでくるのでクライアントが判断しなくていい)
             var answer = state.RoomInfo!.Players.FirstOrDefault(p => p.Ulid == x.AnswerPlayerUlid);
-            state.logger.ZLogInformation($"{answer.Name}が{x.Index}を選択しています... me:{state.player.Name}");
+            state.logger.ZLogInformation($"{answer.Name}が{x.Index}を選択しています... me:{state.Player.Name}");
         }).AddTo(disposable);
         
         // OnResultのイベント購読
         MajorityGameHub.OnResult.Subscribe(this, (x, state) =>
         {
-            // (質問者だけに飛んでくるのでクライアントが判断しなくていい)
             var str = string.Join("と", x.Majorities.Select(m => state.RoomInfo!.Players.Find(x => x.Ulid == m)));
             state.logger.ZLogInformation($"{str}がマジョリティでした！");
-            state.logger.ZLogInformation($"あなたは{(x.Majorities.Contains(state.player.Ulid)? "敗北..." : "勝利！")}");
+            state.logger.ZLogInformation($"あなたは{(x.Majorities.Contains(state.Player.Ulid)? "敗北..." : "勝利！")} me:{state.Player.Name}");
         }).AddTo(disposable);
     }
 
