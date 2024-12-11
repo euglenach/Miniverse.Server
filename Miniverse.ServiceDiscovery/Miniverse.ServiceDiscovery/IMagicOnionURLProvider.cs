@@ -13,3 +13,13 @@ public class MagicOnionURLProvider : IMagicOnionURLProvider
         return ["http://localhost:5209"];
     }
 }
+
+public class EnvironmentVariableURLProvider : IMagicOnionURLProvider
+{
+    public string[] GetURLs()
+    {
+        if(Environment.GetEnvironmentVariable("MAGICONION_ADDRESS") is not {} addresses) return [];
+
+        return addresses.Split(",");
+    }
+}

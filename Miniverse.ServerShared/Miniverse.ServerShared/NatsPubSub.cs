@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 using NATS.Client.Core;
-using NATS.Client.Hosting;
 
 namespace Miniverse.ServerShared.Nats;
 

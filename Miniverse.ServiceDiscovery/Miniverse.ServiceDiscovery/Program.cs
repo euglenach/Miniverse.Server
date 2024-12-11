@@ -9,7 +9,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 // DI
-builder.Services.AddSingleton<IMagicOnionURLProvider, MagicOnionURLProvider>();
+if(Environment.GetEnvironmentVariable("MAGICONION_ADDRESS") is {})
+{
+    builder.Services.AddSingleton<IMagicOnionURLProvider, EnvironmentVariableURLProvider>();
+}
+else
+{
+    builder.Services.AddSingleton<IMagicOnionURLProvider, MagicOnionURLProvider>();
+}
 builder.Services.AddSingleton<IMagicOnionURLResolver, RandomURLResolver>();
 
 // MessagePack設定 https://spacekey.info/posts/2167/ https://www.misuzilla.org/Blog/page/19/
@@ -22,6 +29,14 @@ builder.Services.AddMvc()
            option.OutputFormatters.Add(new MessagePackOutputFormatter(ContractlessStandardResolver.Options));
            option.InputFormatters.Add(new MessagePackInputFormatter(ContractlessStandardResolver.Options));
        });
+
+builder.WebHost.UseKestrel(options =>
+{
+    if(Environment.GetEnvironmentVariable("PORT") is {} port && int.TryParse(port, out var result))
+    {
+        options.ListenAnyIP(result);
+    }
+});
 
 var app = builder.Build();
 // ミドルウェアのパイプライン設定
