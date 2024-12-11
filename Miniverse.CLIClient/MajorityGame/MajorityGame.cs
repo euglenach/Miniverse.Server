@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Miniverse.CLIClient.Utility;
+using ValueTaskSupplement;
 using ZLogger;
 
 namespace Miniverse.CLIClient;
@@ -38,7 +39,19 @@ public class MajorityGame
             await guest.MatchingHub.JoinRoomAsync(roomUlid);
             (await Wait.Until(() => guest.RoomInfo is not null, cancellationToken : cancellationToken)).Should().BeTrue();
         }
+
+        // 人数チェック
+        foreach(var player in majorityGamePayers)
+        {
+            player.RoomInfo.Should().NotBeNull();
+            player.RoomInfo!.Players.Count.Should().Be(majorityGamePayers.Length);
+        }
         
         LogManager.Global.ZLogInformation($"Complete Matching!!");
+        
+        // 全員の接続を待つ
+        await ValueTaskEx.WhenAll(
+            majorityGamePayers.Select(x => x.ConnectGameAsync(cancellationToken))
+            );
     }
 }

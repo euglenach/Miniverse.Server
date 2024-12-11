@@ -42,6 +42,7 @@ public class MajorityGameRoom(ILogger<MajorityGameRoom> logger, NatsPubSub nats,
 
     public bool Update(in LogicLooperActionContext context)
     {
+        if(context.CancellationToken.IsCancellationRequested) return false;
         // logger.ZLogInformation($"Update!");
         questionService.Update(context);
         return true;

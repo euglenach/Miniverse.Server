@@ -31,8 +31,11 @@ public class QuestionService(IServiceProvider serviceProvider, ILogger<QuestionS
         }
     }
     
-    public async ValueTask AskQuestion(Ulid playerUlid, string questionText, string[] choices)
+    public async ValueTask AskQuestion(Ulid playerUlid, string questionText, string[]? choices)
     {
+        if(playerUlid == default || string.IsNullOrEmpty(questionText) || choices is null || choices.Length <= 1)
+            return;
+        
         using var ___ = await asyncLock.EnterScope();
         
         if(session is not null)
@@ -55,6 +58,7 @@ public class QuestionService(IServiceProvider serviceProvider, ILogger<QuestionS
 
     public async ValueTask Select(Ulid playerUlid, int index)
     {
+        if(playerUlid == default) return;
         using var ___ = await asyncLock.EnterScope();
         
         if(session is null)
@@ -72,6 +76,7 @@ public class QuestionService(IServiceProvider serviceProvider, ILogger<QuestionS
 
     public async ValueTask ResultOpen(Ulid playerUlid)
     {
+        if(playerUlid == default) return;
         using var ___ = await asyncLock.EnterScope();
         
         if(session is null)
