@@ -10,15 +10,15 @@ namespace Miniverse.CLIClient.StreamingHubs;
 
 public class MatchingHub
 {
-    private Player player;
-    private GrpcChannel channel;
-    private IMatchingHub matchingHub;
+    private readonly Player player;
+    private readonly GrpcChannel channel;
+    private readonly IMatchingHub matchingHub;
     private readonly MatchingReceiver receiver;
     
     #region MatchingReceiverEvents
-    public Observable<Player> OnJoin => receiver.onJoin;
-    public Observable<MajorityGameRoomInfo> OnJoinSelf => receiver.onJoinSelf;
-    public Observable<Player> OnLeave => receiver.onLeave;
+    public Observable<Player> OnJoin => receiver.OnJoin;
+    public Observable<MajorityGameRoomInfo> OnJoinSelf => receiver.OnJoinSelf;
+    public Observable<Player> OnLeave => receiver.OnLeave;
 
     #endregion
     
@@ -61,26 +61,26 @@ public class MatchingHub
 
     private class MatchingReceiver : IMatchingReceiver
     {
-        public readonly Subject<Player> onJoin = new();
-        public readonly Subject<MajorityGameRoomInfo> onJoinSelf = new();
-        public readonly Subject<Player> onLeave = new();
+        public readonly Subject<Player> OnJoin = new();
+        public readonly Subject<MajorityGameRoomInfo> OnJoinSelf = new();
+        public readonly Subject<Player> OnLeave = new();
             
         void IMatchingReceiver.OnJoin(Player player)
         {
             // LogManager.Global.ZLogDebug($"{nameof(IMatchingReceiver.OnJoin)}");
-            onJoin.OnNext(player);
+            OnJoin.OnNext(player);
         }
 
         void IMatchingReceiver.OnJoinSelf(MajorityGameRoomInfo roomInfo)
         {
             // LogManager.Global.ZLogDebug($"{nameof(IMatchingReceiver.OnJoinSelf)}");
-            onJoinSelf.OnNext(roomInfo);
+            OnJoinSelf.OnNext(roomInfo);
         }
 
-        public void OnLeave(Player player)
+        void IMatchingReceiver.OnLeave(Player player)
         {
             // LogManager.Global.ZLogDebug($"{nameof(IMatchingReceiver.OnLeave)}");
-            onLeave.OnNext(player);
+            OnLeave.OnNext(player);
         }
     }
 }

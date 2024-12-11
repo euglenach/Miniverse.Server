@@ -10,10 +10,10 @@ namespace Miniverse.CLIClient;
 public class MajorityGamePayer : IDisposable
 {
     private readonly Player player;
-    public MatchingHub Hub{get; private set;}
+    public MatchingHub MatchingHub{get; private set;}
     public MajorityGameRoomInfo? RoomInfo{get;private set;}
     private readonly CompositeDisposable disposable = new();
-    private ILogger<MajorityGamePayer> logger;
+    private readonly ILogger<MajorityGamePayer> logger;
     
     public MajorityGamePayer(int index)
     {
@@ -22,30 +22,30 @@ public class MajorityGamePayer : IDisposable
         {
             logging.SetMinimumLevel(LogLevel.Debug);
             logging.AddZLoggerConsole(options => options.UsePlainTextFormatter(formatter => 
-                formatter.SetPrefixFormatter($"{0:local-longdate} [{1:short}] [{2:short}] ",
+                formatter.SetPrefixFormatter($"{0:timeonly} [{1:short}] [{2:short}] ",
                                              (in MessageTemplate template, in LogInfo info) => template.Format(info.Timestamp, info.LogLevel, player.Ulid.ToString()))));
         }).CreateLogger<MajorityGamePayer>();
     }
 
     public async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
     {
-        Hub = await MatchingHub.CreateAsync(player);
+        MatchingHub = await MatchingHub.CreateAsync(player);
         EventSubscribe();
     }
 
     void EventSubscribe()
     {
-        Hub.OnJoinSelf.Subscribe(this, static (roomInfo, state) =>
+        MatchingHub.OnJoinSelf.Subscribe(this, static (roomInfo, state) =>
         {
             state.RoomInfo = roomInfo;
-            state.logger.ZLogDebug($"{nameof(Hub.OnJoinSelf)}: room:{roomInfo.Ulid} me:{state.player.Name}");
+            state.logger.ZLogInformation($"{nameof(MatchingHub.OnJoinSelf)}: room:{roomInfo.Ulid} me:{state.player.Name}");
         }).AddTo(disposable);
         
-        Hub.OnJoin.Subscribe(this, static (player, state) =>
+        MatchingHub.OnJoin.Subscribe(this, static (player, state) =>
            {
                if(state.RoomInfo is null) return;
                state.RoomInfo.Players.Add(player);
-               state.logger.ZLogDebug($"{nameof(Hub.OnJoin)}: {player.Name}");
+               state.logger.ZLogInformation($"{nameof(MatchingHub.OnJoin)}: {player.Name}");
            })
            .AddTo(disposable);
     }

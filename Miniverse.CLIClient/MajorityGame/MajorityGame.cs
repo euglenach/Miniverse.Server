@@ -8,6 +8,8 @@ public class MajorityGame
 {
     public async ValueTask Run(CancellationToken cancellationToken = default)
     {
+        LogManager.Global.ZLogInformation($"Start MajorityGame CLI...");
+        
         var playerNum = 4;
         var majorityGamePayers = new MajorityGamePayer[playerNum];
 
@@ -16,6 +18,7 @@ public class MajorityGame
         {
             var player = new MajorityGamePayer(i);
             majorityGamePayers[i] = player;
+            // 初期化。MagicOnionの接続をしたり
             await player.InitializeAsync(cancellationToken);
         }
 
@@ -23,19 +26,19 @@ public class MajorityGame
         var guests = majorityGamePayers[1..];
 
         // ルーム作成
-        await host.Hub.CreateRoomAsync();
+        await host.MatchingHub.CreateRoomAsync();
 
-        (await Wait.WaitUntil(() => host.RoomInfo is not null, cancellationToken : cancellationToken)).Should().BeTrue();
+        (await Wait.Until(() => host.RoomInfo is not null, cancellationToken : cancellationToken)).Should().BeTrue();
 
         var roomUlid = host.RoomInfo.Ulid;
 
         // ゲストの入室
         foreach(var guest in guests)
         {
-            await guest.Hub.JoinRoomAsync(roomUlid);
-            (await Wait.WaitUntil(() => guest.RoomInfo is not null, cancellationToken : cancellationToken)).Should().BeTrue();
+            await guest.MatchingHub.JoinRoomAsync(roomUlid);
+            (await Wait.Until(() => guest.RoomInfo is not null, cancellationToken : cancellationToken)).Should().BeTrue();
         }
         
-        LogManager.Global.ZLogInformation($"Complete Majority game!");
+        LogManager.Global.ZLogInformation($"Complete Matching!!");
     }
 }

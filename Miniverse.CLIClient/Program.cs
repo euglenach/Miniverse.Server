@@ -6,8 +6,6 @@ using ZLogger;
 
 MessagePackOptionRegister.Register();
 
-LogManager.Global.ZLogDebug($"aaaaaaaaaaa");
-
 var test = new MajorityGame();
 
 await test.Run();

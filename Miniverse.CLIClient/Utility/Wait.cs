@@ -2,7 +2,7 @@
 
 public static class Wait
 {
-    public static async ValueTask<bool> WaitUntil(Func<bool> predicate, float timeoutSeconds = 10, CancellationToken cancellationToken = default)
+    public static async ValueTask<bool> Until(Func<bool> predicate, float timeoutSeconds = 10, CancellationToken cancellationToken = default)
     {
         if (predicate == null)
             throw new ArgumentNullException(nameof(predicate));
