@@ -11,6 +11,7 @@ public class MajorityGamePayer : IDisposable
 {
     private readonly Player player;
     public MatchingHub MatchingHub{get; private set;}
+    public MajorityGameHub MajorityGameHub{get; private set;}
     public MajorityGameRoomInfo? RoomInfo{get;private set;}
     private readonly CompositeDisposable disposable = new();
     private readonly ILogger<MajorityGamePayer> logger;
@@ -30,6 +31,7 @@ public class MajorityGamePayer : IDisposable
     public async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
     {
         MatchingHub = await MatchingHub.CreateAsync(player);
+        MajorityGameHub = await MajorityGameHub.CreateAsync(player);
         EventSubscribe();
     }
 

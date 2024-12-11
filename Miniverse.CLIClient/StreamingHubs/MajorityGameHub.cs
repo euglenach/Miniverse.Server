@@ -45,17 +45,17 @@ public class MajorityGameHub
         
         void IMajorityGameReceiver.OnAskedQuestion(MajorityGameQuestion question)
         {
-            
+            OnAskedQuestion.OnNext(question);
         }
 
         void IMajorityGameReceiver.OnSelected(Ulid answerPlayerUlid, int index)
         {
-            
+            OnSelected.OnNext((answerPlayerUlid, index));
         }
 
         void IMajorityGameReceiver.OnResult(MajorityGameResult result)
         {
-            
+            OnResult.OnNext(result);
         }
     }
 }
