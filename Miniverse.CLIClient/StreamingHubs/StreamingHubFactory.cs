@@ -1,4 +1,5 @@
-﻿using Grpc.Net.Client;
+﻿using Grpc.Core;
+using Grpc.Net.Client;
 using MagicOnion;
 using MagicOnion.Client;
 using MiniverseShared.MessagePackObjects;
@@ -8,16 +9,24 @@ namespace Miniverse.CLIClient.StreamingHubs;
 
 public class StreamingHubFactory
 {
-    public static async ValueTask<(THub hub, GrpcChannel channel)> CreateAsync<THub, TReceiver>(TReceiver receiver)
+    public static ValueTask<(THub hub, GrpcChannel channel)> CreateAsync<THub, TReceiver>(TReceiver receiver, Ulid playerUlid, Ulid roomUlid)
+        where THub: IStreamingHub<THub, TReceiver>
+    {
+        var headers = new Metadata { { "player_ulid", playerUlid.ToString() }, {"room_ulid", roomUlid.ToString() } };
+
+        return CreateAsync<THub, TReceiver>(receiver, headers);
+    }
+    
+    public static async ValueTask<(THub hub, GrpcChannel channel)> CreateAsync<THub, TReceiver>(TReceiver receiver, Metadata? header = default)
         where THub: IStreamingHub<THub, TReceiver>
     {
         // todo: アドレスはサービスディスカバリからもらう
         
         // Connect to the server using gRPC channel.
         var channel = GrpcChannel.ForAddress("http://localhost:5209", new GrpcChannelOptions(){HttpHandler =  new HttpClientHandler() { ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator }});
-
+        
         // Create a proxy to call the server transparently.
-        var hubClient = await StreamingHubClient.ConnectAsync<THub, TReceiver>(channel, receiver);
+        var hubClient = await StreamingHubClient.ConnectAsync<THub, TReceiver>(channel, receiver, option: new(header));
 
         return (hubClient, channel);
     }

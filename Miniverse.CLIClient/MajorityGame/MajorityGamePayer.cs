@@ -28,14 +28,19 @@ public class MajorityGamePayer : IDisposable
         }).CreateLogger<MajorityGamePayer>();
     }
 
-    public async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
+    public async ValueTask ConnectMatchingAsync(CancellationToken cancellationToken = default)
     {
         MatchingHub = await MatchingHub.CreateAsync(player);
-        MajorityGameHub = await MajorityGameHub.CreateAsync(player);
-        EventSubscribe();
+        MatchingEventSubscribe();
     }
 
-    void EventSubscribe()
+    public async ValueTask ConnectGameAsync(CancellationToken cancellationToken = default)
+    {
+        MajorityGameHub = await MajorityGameHub.CreateAsync(player, RoomInfo.Ulid);
+        MajorityGameEventSubscribe();
+    }
+
+    void MatchingEventSubscribe()
     {
         MatchingHub.OnJoinSelf.Subscribe(this, static (roomInfo, state) =>
         {
@@ -50,6 +55,11 @@ public class MajorityGamePayer : IDisposable
                state.logger.ZLogInformation($"{nameof(MatchingHub.OnJoin)}: {player.Name}");
            })
            .AddTo(disposable);
+    }
+
+    void MajorityGameEventSubscribe()
+    {
+        
     }
 
     public void Dispose()

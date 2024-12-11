@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Grpc.Core;
 using Grpc.Net.Client;
 using MagicOnion.Client;
 using MiniverseShared.MessagePackObjects;
@@ -34,8 +35,8 @@ public class MatchingHub
     {
         
         // Connect to the server using gRPC channel.
-        var channel = GrpcChannel.ForAddress("http://localhost:5209", new GrpcChannelOptions(){HttpHandler =  new HttpClientHandler() { ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator }});
-
+        var channel = GrpcChannel.ForAddress("http://localhost:5209", new GrpcChannelOptions());
+        
         var receiver = new MatchingReceiver();
         // Create a proxy to call the server transparently.
         var hubClient = await StreamingHubClient.ConnectAsync<IMatchingHub, IMatchingReceiver>(channel, receiver);

@@ -30,10 +30,10 @@ public class MajorityGameHub
     
     
     
-    public static async ValueTask<MajorityGameHub> CreateAsync(Player player)
+    public static async ValueTask<MajorityGameHub> CreateAsync(Player player, Ulid roomUlid)
     {
         var receiver = new MajorityGameReceiver();
-        var (hub, channel) = await StreamingHubFactory.CreateAsync<IMajorityGameHub, IMajorityGameReceiver>(receiver);
+        var (hub, channel) = await StreamingHubFactory.CreateAsync<IMajorityGameHub, IMajorityGameReceiver>(receiver, player.Ulid, roomUlid);
         return new(player, channel, hub, receiver);
     }
 

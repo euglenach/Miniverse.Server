@@ -19,7 +19,7 @@ public class MajorityGame
             var player = new MajorityGamePayer(i);
             majorityGamePayers[i] = player;
             // 初期化。MagicOnionの接続をしたり
-            await player.InitializeAsync(cancellationToken);
+            await player.ConnectMatchingAsync(cancellationToken);
         }
 
         var host = majorityGamePayers[0];
