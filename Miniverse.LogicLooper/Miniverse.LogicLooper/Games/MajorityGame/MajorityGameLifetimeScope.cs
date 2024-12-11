@@ -7,5 +7,7 @@ public static class MajorityGameLifetimeScope
         services.AddScoped<MajorityGameRoom>();
         services.AddScoped<MajorityGameMessageReceiver>();
         services.AddScoped<RoomInfoProvider>();
+        services.AddScoped<QuestionService>();
+        services.AddTransient<QuestionSession>();
     }
 }

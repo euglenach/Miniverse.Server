@@ -7,12 +7,14 @@ using ZLogger;
 
 namespace Miniverse.LogicLooperServer;
 
-public class MajorityGameRoom(ILogger<MajorityGameRoom> logger, NatsPubSub nats, RoomInfoProvider roomInfoProvider, MajorityGameMessageReceiver messageReceiver)
+public class MajorityGameRoom(ILogger<MajorityGameRoom> logger, NatsPubSub nats, RoomInfoProvider roomInfoProvider, 
+                              MajorityGameMessageReceiver messageReceiver, QuestionService questionService)
 {
-    private MajorityGameRoomInfo roomInfo;
+    private MajorityGameRoomInfo? roomInfo;
     
     public async ValueTask InitializeAsync(MajorityGameRoomInfo roomInfo, CancellationToken token = default)
     {
+        if(this.roomInfo is not null) return;
         logger.ZLogInformation($"created MajorityGame room. ulid: {roomInfo.Ulid}");
         
         // いろいろ初期化
@@ -28,6 +30,8 @@ public class MajorityGameRoom(ILogger<MajorityGameRoom> logger, NatsPubSub nats,
     
     public async ValueTask RoomJoin(Player player)
     {
+        if(player is null || roomInfo is null || roomInfo.Players.Contains(player, EqualityComparer<Player>.Create((a, b) => (a is null && b is null) || (a is not null && b is not null && a.Ulid == b.Ulid))))
+            return;
         logger.ZLogInformation($"{player.Name} is joined. room:{roomInfo.Ulid}");
         roomInfo.Players.Add(player);
         
@@ -39,6 +43,7 @@ public class MajorityGameRoom(ILogger<MajorityGameRoom> logger, NatsPubSub nats,
     public bool Update(in LogicLooperActionContext context)
     {
         // logger.ZLogInformation($"Update!");
+        questionService.Update(context);
         return true;
     }
 }
