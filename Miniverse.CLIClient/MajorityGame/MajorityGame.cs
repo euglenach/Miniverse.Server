@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Miniverse.CLIClient.Utility;
+using ZLogger;
 
 namespace Miniverse.CLIClient;
 
@@ -34,5 +35,7 @@ public class MajorityGame
             await guest.Hub.JoinRoomAsync(roomUlid);
             (await Wait.WaitUntil(() => guest.RoomInfo is not null, cancellationToken : cancellationToken)).Should().BeTrue();
         }
+        
+        LogManager.Global.ZLogInformation($"Complete Majority game!");
     }
 }

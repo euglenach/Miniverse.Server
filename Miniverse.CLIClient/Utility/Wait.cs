@@ -2,8 +2,6 @@
 
 public static class Wait
 {
-    
-    
     public static async ValueTask<bool> WaitUntil(Func<bool> predicate, float timeoutSeconds = 10, CancellationToken cancellationToken = default)
     {
         if (predicate == null)
@@ -25,8 +23,7 @@ public static class Wait
         }
         catch (OperationCanceledException)
         {
-            if(cancellation.IsCancellationRequested)return false;
-            throw;
+            return false;
         }
 
         return true;

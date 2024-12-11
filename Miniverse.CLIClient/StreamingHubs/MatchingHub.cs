@@ -32,8 +32,9 @@ public class MatchingHub
     
     public static async ValueTask<MatchingHub> CreateAsync(Player player)
     {
+        
         // Connect to the server using gRPC channel.
-        var channel = GrpcChannel.ForAddress("http://localhost:5209");
+        var channel = GrpcChannel.ForAddress("http://localhost:5209", new GrpcChannelOptions(){HttpHandler =  new HttpClientHandler() { ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator }});
 
         var receiver = new MatchingReceiver();
         // Create a proxy to call the server transparently.
@@ -66,19 +67,19 @@ public class MatchingHub
             
         void IMatchingReceiver.OnJoin(Player player)
         {
-            LogManager.Global.ZLogDebug($"{nameof(IMatchingReceiver.OnJoin)}");
+            // LogManager.Global.ZLogDebug($"{nameof(IMatchingReceiver.OnJoin)}");
             onJoin.OnNext(player);
         }
 
         void IMatchingReceiver.OnJoinSelf(MajorityGameRoomInfo roomInfo)
         {
-            LogManager.Global.ZLogDebug($"{nameof(IMatchingReceiver.OnJoinSelf)}");
+            // LogManager.Global.ZLogDebug($"{nameof(IMatchingReceiver.OnJoinSelf)}");
             onJoinSelf.OnNext(roomInfo);
         }
 
         public void OnLeave(Player player)
         {
-            LogManager.Global.ZLogDebug($"{nameof(IMatchingReceiver.OnLeave)}");
+            // LogManager.Global.ZLogDebug($"{nameof(IMatchingReceiver.OnLeave)}");
             onLeave.OnNext(player);
         }
     }

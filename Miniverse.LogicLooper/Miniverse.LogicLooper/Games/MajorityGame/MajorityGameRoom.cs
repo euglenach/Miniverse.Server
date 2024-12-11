@@ -38,7 +38,7 @@ public class MajorityGameRoom(ILogger<MajorityGameRoom> logger, NatsPubSub nats,
 
     public bool Update(in LogicLooperActionContext context)
     {
-        logger.ZLogInformation($"Update!");
+        // logger.ZLogInformation($"Update!");
         return true;
     }
 }
