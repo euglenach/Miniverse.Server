@@ -49,6 +49,8 @@ public class MajorityGameHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Str
         nats.Subscribe<OnSelectedMsg>(roomUlid.ToString()).ToObservable()
             .Subscribe(this, static (msg, state) =>
             {
+                // 質問者にしか返さない
+                if(msg.TargetUlid != state.playerUlid) return;
                 state.BroadcastToSelf(state.room!).OnSelected(msg.SelectedPlayerUlid, msg.Index);
             }).RegisterTo(cancellation.Token);
         
