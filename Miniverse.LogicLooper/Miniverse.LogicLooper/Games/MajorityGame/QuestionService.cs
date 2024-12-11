@@ -84,12 +84,6 @@ public class QuestionService(IServiceProvider serviceProvider, ILogger<QuestionS
         if(session.PlayerUlid != playerUlid) return;
         
         await ResultOpenCore();
-
-        lock(sessionLock)
-        {
-            session = null;
-            elapsed = 0;
-        }
     }
 
     async ValueTask ResultOpenCore()
@@ -97,6 +91,9 @@ public class QuestionService(IServiceProvider serviceProvider, ILogger<QuestionS
         if(session is null) return;
 
         var data = session.CreateResult();
+        session = null;
+        elapsed = 0;
+        
         // 結果をMagicOnionに送る
         await nats.Publish(roomUlid.ToString(), new OnResultMsg(data));
     }
