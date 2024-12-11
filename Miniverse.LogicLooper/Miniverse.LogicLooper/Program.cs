@@ -3,11 +3,16 @@ using Miniverse.LogicLooper;
 using Miniverse.LogicLooperServer;
 using Miniverse.ServerShared;
 using Miniverse.ServerShared.Nats;
+using MiniverseShared.Utility;
 using ZLogger;
 
 //github.com/Cysharp/LogicLooper/blob/master/samples/LoopHostingApp/Program.cs
 
 MessagePackOptionRegister.Register();
+ValueTaskExtensions.RegisterUnhandledExceptionHandler(e =>
+{
+    LogManager.Logger.ZLogError($"UnhandledException: {e}");
+});
 
 var builder = WebApplication.CreateBuilder(args);
 

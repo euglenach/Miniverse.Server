@@ -24,7 +24,7 @@ public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Streami
         this.roomUlid = Ulid.NewUlid();
         this.player = player;
         this.room = await Group.AddAsync(player.Ulid.ToString());
-        logger.ZLogInformation($"Joining matching hub... Player:{player.Ulid}: roomUlid:{roomUlid}");
+        logger.ZLogInformation($"Creating matching...  Player:{player.Ulid}: roomUlid:{roomUlid}");
         
         // natsで部屋を生成したことをLogicLooperに投げたい
         await nats.Publish(new CreateRoomMsg(roomUlid, player));
@@ -51,6 +51,7 @@ public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Streami
         nats.Subscribe<OnJoinSelfMsg>(roomUild.ToString()).ToObservable()
             .Subscribe(this, (msg, state) =>
             {
+                if(msg.Player is null || msg.RoomInfo is null) return;
                 if(msg.Player.Ulid == state.player!.Ulid) return;
                 state.BroadcastToSelf(state.room!).OnJoin(msg.Player);
                 state.logger.ZLogInformation($"Joined room:{state.roomUlid} player:{msg.Player}");
@@ -60,6 +61,7 @@ public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Streami
         nats.Subscribe<OnJoinSelfMsg>(roomUild.ToString()).ToObservable()
                   .Subscribe(this, (msg, state) =>
                   {
+                      if(msg.Player is null || msg.RoomInfo is null) return;
                       if(msg.Player.Ulid != state.player!.Ulid) return;
                       state.BroadcastToSelf(state.room!).OnJoinSelf(msg.RoomInfo);
                       state.logger.ZLogInformation($"Joined room:{state.roomUlid} player:{msg.Player}");
