@@ -31,7 +31,7 @@ public class MatchingHub
         this.receiver = receiver;
     }
     
-    public static async ValueTask<MatchingHub> CreateAsync(Player player)
+    public static async ValueTask<MatchingHub> CreateAsync(Player player, CancellationToken cancellationToken = default)
     {
         
         // Connect to the server using gRPC channel.
@@ -39,7 +39,7 @@ public class MatchingHub
         
         var receiver = new MatchingReceiver();
         // Create a proxy to call the server transparently.
-        var hubClient = await StreamingHubClient.ConnectAsync<IMatchingHub, IMatchingReceiver>(channel, receiver);
+        var hubClient = await StreamingHubClient.ConnectAsync<IMatchingHub, IMatchingReceiver>(channel, receiver, cancellationToken : cancellationToken);
             
         return new(player, channel, hubClient, receiver);
     }

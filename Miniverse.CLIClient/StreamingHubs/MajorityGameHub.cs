@@ -27,13 +27,28 @@ public class MajorityGameHub
     public Observable<MajorityGameResult> OnResult => receiver.OnResult;
 
     #endregion
+
+    public async ValueTask AskQuestion(string questionText, string[] choices)
+    {
+        await hub.AskQuestion(questionText, choices);
+    }
+
+    public async ValueTask Select(int index)
+    {
+        await hub.Select(index);
+    }
+
+    public async ValueTask ResultOpen()
+    {
+        await hub.ResultOpen();
+    } 
     
     
     
-    public static async ValueTask<MajorityGameHub> CreateAsync(Player player, Ulid roomUlid)
+    public static async ValueTask<MajorityGameHub> CreateAsync(Player player, Ulid roomUlid, CancellationToken cancellationToken = default)
     {
         var receiver = new MajorityGameReceiver();
-        var (hub, channel) = await StreamingHubFactory.CreateAsync<IMajorityGameHub, IMajorityGameReceiver>(receiver, player.Ulid, roomUlid);
+        var (hub, channel) = await StreamingHubFactory.CreateAsync<IMajorityGameHub, IMajorityGameReceiver>(receiver, player.Ulid, roomUlid, cancellationToken);
         return new(player, channel, hub, receiver);
     }
 

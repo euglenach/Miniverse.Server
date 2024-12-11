@@ -53,5 +53,7 @@ public class MajorityGame
         await ValueTaskEx.WhenAll(
             majorityGamePayers.Select(x => x.ConnectGameAsync(cancellationToken))
             );
+        
+        
     }
 }

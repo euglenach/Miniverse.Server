@@ -11,9 +11,9 @@ namespace Miniverse.LogicLooperServer;
 public class QuestionService(IServiceProvider serviceProvider, ILogger<QuestionService> logger, NatsPubSub nats, RoomInfoProvider roomInfoProvider)
 {
     private QuestionSession? session;
+    MajorityGameRoomInfo? roomInfo;
     private readonly AsyncLock asyncLock = new();
     private readonly Lock sessionLock = new();
-    private Ulid roomUlid;
     private double elapsed;
 
     public void Update(in LogicLooperActionContext ctx)
@@ -33,7 +33,7 @@ public class QuestionService(IServiceProvider serviceProvider, ILogger<QuestionS
     
     public async ValueTask AskQuestion(Ulid playerUlid, string questionText, string[]? choices)
     {
-        if(playerUlid == default || string.IsNullOrEmpty(questionText) || choices is null || choices.Length <= 1)
+        if(playerUlid == Ulid.Empty || string.IsNullOrEmpty(questionText) || choices is null || choices.Length <= 1)
             return;
         
         using var ___ = await asyncLock.EnterScope();
@@ -44,8 +44,7 @@ public class QuestionService(IServiceProvider serviceProvider, ILogger<QuestionS
             return;
         }
 
-        var room = await roomInfoProvider.RoomInfoAsyncLazy; 
-        roomUlid = room.Ulid;
+        roomInfo = await roomInfoProvider.RoomInfoAsyncLazy;
 
         // 質問クラス生成
         session = serviceProvider.GetRequiredService<QuestionSession>();
@@ -53,12 +52,12 @@ public class QuestionService(IServiceProvider serviceProvider, ILogger<QuestionS
 
         // MagicOnionに送る
         var data = new MajorityGameQuestion(playerUlid, questionText, choices);
-        await nats.Publish(roomUlid.ToString(), new OnAskedQuestionMsg(data));
+        await nats.Publish(roomInfo.Ulid.ToString(), new OnAskedQuestionMsg(data));
     }
 
     public async ValueTask Select(Ulid playerUlid, int index)
     {
-        if(playerUlid == default) return;
+        if(playerUlid == Ulid.Empty || roomInfo is null) return;
         using var ___ = await asyncLock.EnterScope();
         
         if(session is null)
@@ -71,12 +70,12 @@ public class QuestionService(IServiceProvider serviceProvider, ILogger<QuestionS
         if(!session.RegisterSelected(playerUlid, index)) return;
 
         // 選択をMagicOnionに送る(カリング用に質問者のIDも送る)
-        await nats.Publish(roomUlid.ToString(), new OnSelectedMsg(session.PlayerUlid, playerUlid, index));
+        await nats.Publish(roomInfo.Ulid.ToString(), new OnSelectedMsg(session.PlayerUlid, playerUlid, index));
     }
 
     public async ValueTask ResultOpen(Ulid playerUlid)
     {
-        if(playerUlid == default) return;
+        if(playerUlid == Ulid.Empty) return;
         using var ___ = await asyncLock.EnterScope();
         
         if(session is null)
@@ -93,13 +92,13 @@ public class QuestionService(IServiceProvider serviceProvider, ILogger<QuestionS
 
     async ValueTask ResultOpenCore()
     {
-        if(session is null) return;
+        if(session is null || roomInfo is null) return;
 
         var data = session.CreateResult();
         session = null;
         elapsed = 0;
         
         // 結果をMagicOnionに送る
-        await nats.Publish(roomUlid.ToString(), new OnResultMsg(data));
+        await nats.Publish(roomInfo.Ulid.ToString(), new OnResultMsg(data));
     }
 }

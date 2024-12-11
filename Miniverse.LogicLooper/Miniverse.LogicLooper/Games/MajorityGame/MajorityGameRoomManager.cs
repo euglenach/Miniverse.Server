@@ -26,7 +26,7 @@ public class MajorityGameRoomManager(ILogicLooperPool looperPool, ILogger<Majori
         var room = scope.ServiceProvider.GetRequiredService<MajorityGameRoom>();
         gameRooms.Add(roomUlid, room);
         
-        var roomInfo = new MajorityGameRoomInfo(roomUlid, [player]);
+        var roomInfo = new MajorityGameRoomInfo(roomUlid, [player], null);
         await room.InitializeAsync(roomInfo, token);
         
         // フレームレートの設定
