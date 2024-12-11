@@ -1,8 +1,10 @@
 ﻿using Grpc.Core;
 using MagicOnion.Server.Hubs;
 using Miniverse.ServerShared.Nats;
+using Miniverse.ServerShared.NatsMessage.MajorityGame;
 using MiniverseShared.MessagePackObjects;
 using MiniverseShared.StreamingHubs;
+using R3;
 using ZLogger;
 
 namespace Miniverse.MagicOnion.StreamingHubs;
@@ -15,20 +17,47 @@ public class MajorityGameHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Str
     private NatsPubSub nats{get;} = nats;
     private ILogger<MatchingHub> logger{get;} = logger;
     private readonly CancellationTokenSource cancellation = new();
-
-    public async ValueTask AskQuestion(string questionText)
+    
+    public async ValueTask AskQuestion(string questionText, string[] choices)
     {
-        
+        await nats.Publish(roomUlid.ToString(), new AskQuestionMsg(playerUlid, questionText, choices));
+        logger.LogInformation($"{nameof(AskQuestion)}: Q:{questionText}, C:{string.Join(",", choices)}");
     }
 
     public async ValueTask Select(int index)
     {
-        
+        await nats.Publish(roomUlid.ToString(), new ChoiceSelectMsg(playerUlid, index));
+        logger.LogInformation($"{nameof(Select)}: Select:{index}");
     }
 
-    public async ValueTask ResultAsync()
+    public async ValueTask ResultOpen()
     {
+        await nats.Publish(roomUlid.ToString(), new ResultOpenMsg(playerUlid));
+        logger.LogInformation($"{nameof(Select)} ResultOpen:{playerUlid}");
+    }
+
+    void EventSubscribe()
+    {
+        // 質問された通知
+        nats.Subscribe<OnAskedQuestionMsg>(roomUlid.ToString()).ToObservable()
+            .Subscribe(this, static (msg, state) =>
+            {
+                state.BroadcastToSelf(state.room!).OnAskedQuestion(msg.Question);
+            }).RegisterTo(cancellation.Token);
         
+        // 選択された通知
+        nats.Subscribe<OnSelectedMsg>(roomUlid.ToString()).ToObservable()
+            .Subscribe(this, static (msg, state) =>
+            {
+                state.BroadcastToSelf(state.room!).OnSelected(msg.SelectedPlayerUlid, msg.Index);
+            }).RegisterTo(cancellation.Token);
+        
+        // 結果された通知
+        nats.Subscribe<OnResultMsg>(roomUlid.ToString()).ToObservable()
+            .Subscribe(this, static (msg, state) =>
+            {
+                state.BroadcastToSelf(state.room!).OnResult(msg.Result);
+            }).RegisterTo(cancellation.Token);
     }
     
     protected override ValueTask OnConnecting()
@@ -42,6 +71,7 @@ public class MajorityGameHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Str
 
     protected override async ValueTask OnConnected()
     {
+        EventSubscribe();
         this.room = await Group.AddAsync(playerUlid.ToString());
     }
     
