@@ -8,7 +8,7 @@ public class LooperHelper : IDisposable
     public long CurrentFrame { get; private set; }
     private readonly List<ILooperItem?> looperItems = [];
     private readonly CancellationTokenSource disposeCancellation = new();
-    private readonly object listLock = new();
+    private readonly Lock listLock = new();
     
     public void Update(in LogicLooperActionContext context)
     {
