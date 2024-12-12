@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading;
+using Miniverse.LogicLooper.LooperTasks;
 using Miniverse.ServerShared.Nats;
 using Miniverse.ServerShared.NatsMessage;
 using MiniverseShared.MessagePackObjects;
@@ -8,7 +9,7 @@ using ZLogger;
 namespace Miniverse.LogicLooperServer;
 
 public class MajorityGameRoom(ILogger<MajorityGameRoom> logger, NatsPubSub nats, RoomInfoProvider roomInfoProvider, 
-                              MajorityGameMessageReceiver messageReceiver, QuestionService questionService)
+                              MajorityGameMessageReceiver messageReceiver, QuestionService questionService, LooperHelper looperHelper, LooperTask looperTask)
 {
     private MajorityGameRoomInfo? roomInfo;
     
@@ -42,8 +43,7 @@ public class MajorityGameRoom(ILogger<MajorityGameRoom> logger, NatsPubSub nats,
 
     public bool Update(in LogicLooperActionContext context)
     {
-        if(context.CancellationToken.IsCancellationRequested) return false;
-        // logger.ZLogInformation($"Update!");
+        looperHelper.Update(context);
         questionService.Update(context);
         return true;
     }
