@@ -53,7 +53,7 @@ public class MajorityGameHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Str
             {
                 if(msg.TargetUlid == Ulid.Empty || msg.SelectedPlayerUlid == Ulid.Empty) return;
                 
-                // 質問者にしか返さない
+                // 質問者にしか通知しない
                 if(msg.TargetUlid != state.playerUlid) return;
                 state.BroadcastToSelf(state.room!).OnSelected(msg.SelectedPlayerUlid, msg.Index);
                 state.logger.LogInformation($"{nameof(OnSelectedMsg)}: Selected:{msg}");
