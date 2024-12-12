@@ -9,7 +9,7 @@ using ZLogger;
 namespace Miniverse.LogicLooperServer;
 
 public class MajorityGameRoom(ILogger<MajorityGameRoom> logger, NatsPubSub nats, RoomInfoProvider roomInfoProvider, 
-                              MajorityGameMessageReceiver messageReceiver, QuestionService questionService, LooperHelper looperHelper, LooperTask looperTask)
+                              MajorityGameMessageReceiver messageReceiver, QuestionService questionService)
 {
     private MajorityGameRoomInfo? roomInfo;
     
@@ -41,10 +41,23 @@ public class MajorityGameRoom(ILogger<MajorityGameRoom> logger, NatsPubSub nats,
         await nats.Publish(roomInfo.Ulid.ToString(), new OnJoinMsg(roomInfo.Ulid, player));
     }
 
+    public async ValueTask RoomLeave(Ulid playerUlid)
+    {
+        // 退室通知のあったプレイヤーをリストから削除する
+        if(roomInfo is null) return;
+        if(roomInfo.Players.RemoveAll(p => p.Ulid == playerUlid) < 1) return;
+        
+        logger.ZLogInformation($"{playerUlid} is leaved.");
+        await nats.Publish(roomInfo.Ulid.ToString(), new OnLeaveRoomMsg(playerUlid));
+    }
+
     public bool Update(in LogicLooperActionContext context)
     {
-        looperHelper.Update(context);
+        // ルームから全員が退室していたらUpdateを止める
+        if(roomInfo is null) return true;
+        if(roomInfo.Players.Count == 0) return false;
         questionService.Update(context);
+        // logger.ZLogInformation($"Update!!!");
         return true;
     }
 }

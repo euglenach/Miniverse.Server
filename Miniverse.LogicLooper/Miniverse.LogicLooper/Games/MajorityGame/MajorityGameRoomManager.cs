@@ -16,15 +16,20 @@ public class MajorityGameRoomManager(ILogicLooperPool looperPool, ILogger<Majori
 
     public async ValueTask CreateRoomAsync(Ulid roomUlid, Player player, CancellationToken token = default)
     {
-        using var __ = await roomListLock.EnterScope();
-        if(gameRooms.ContainsKey(roomUlid)) return;
+        var room = default(MajorityGameRoom);
+        var scope = default(IServiceScope);
         
-        // 部屋ごとのIDスコープの作成
-        var scope = scopeFactory.CreateScope();
+        using(await roomListLock.EnterScope())
+        {
+            if(gameRooms.ContainsKey(roomUlid)) return;
+        
+            // 部屋ごとのIDスコープの作成
+            scope = scopeFactory.CreateScope();
 
-        // 部屋作成
-        var room = scope.ServiceProvider.GetRequiredService<MajorityGameRoom>();
-        gameRooms.Add(roomUlid, room);
+            // 部屋作成
+            room = scope.ServiceProvider.GetRequiredService<MajorityGameRoom>();
+            gameRooms.Add(roomUlid, room);
+        }
         
         var roomInfo = new MajorityGameRoomInfo(roomUlid, [player], null);
         await room.InitializeAsync(roomInfo, token);
@@ -33,7 +38,14 @@ public class MajorityGameRoomManager(ILogicLooperPool looperPool, ILogger<Majori
         var option = new LooperActionOptions(60);
         
         // LogicLooperに部屋のUpdateを追加
-        _ = looperPool.RegisterActionAsync(room.Update, option);
+        await looperPool.RegisterActionAsync(room.Update, option);
+        
+        // Updateが終わったら部屋から消す
+        using(await roomListLock.EnterScope())
+        {
+            gameRooms.Remove(roomUlid);
+            scope.Dispose();
+        }
     }
 
     public async ValueTask JoinRoomAsync(Ulid roomUlid, Player player, CancellationToken token = default)
@@ -43,6 +55,15 @@ public class MajorityGameRoomManager(ILogicLooperPool looperPool, ILogger<Majori
         if(!gameRooms.TryGetValue(roomUlid, out var room)) return;
         
         await room.RoomJoin(player);
+    }
+
+    public async ValueTask LeaveRoomAsync(Ulid roomUlid, Ulid playerUlid, CancellationToken token = default)
+    {
+        using var __ = await roomListLock.EnterScope();
+        
+        if(!gameRooms.TryGetValue(roomUlid, out var room)) return;
+        
+        await room.RoomLeave(playerUlid);
     }
 
     public void Dispose()

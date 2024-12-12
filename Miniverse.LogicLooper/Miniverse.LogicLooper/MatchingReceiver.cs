@@ -17,7 +17,7 @@ public class MatchingReceiver(NatsPubSub nats, MajorityGameRoomManager roomManag
         {
             var (manager, token) = x;
             await manager.CreateRoomAsync(msg.RoomUlid, msg.Player, token);
-        } ).AddTo(this.disposable);
+        }).AddTo(this.disposable);
     }
 
     public void Dispose()

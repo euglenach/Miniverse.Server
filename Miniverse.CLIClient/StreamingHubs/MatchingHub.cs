@@ -19,7 +19,7 @@ public class MatchingHub : IDisposable
     #region MatchingReceiverEvents
     public Observable<Player> OnJoin => receiver.OnJoin;
     public Observable<MajorityGameRoomInfo> OnJoinSelf => receiver.OnJoinSelf;
-    public Observable<Player> OnLeave => receiver.OnLeave;
+    public Observable<Ulid> OnLeave => receiver.OnLeave;
 
     #endregion
     
@@ -33,15 +33,10 @@ public class MatchingHub : IDisposable
     
     public static async ValueTask<MatchingHub> CreateAsync(Player player, CancellationToken cancellationToken = default)
     {
-        
-        // Connect to the server using gRPC channel.
-        var channel = GrpcChannel.ForAddress("http://localhost:5209", new GrpcChannelOptions());
-        
         var receiver = new MatchingReceiver();
-        // Create a proxy to call the server transparently.
-        var hubClient = await StreamingHubClient.ConnectAsync<IMatchingHub, IMatchingReceiver>(channel, receiver, cancellationToken : cancellationToken);
+        var (hub, channel) = await StreamingHubFactory.CreateAsync<IMatchingHub, IMatchingReceiver>(receiver, cancellationToken : cancellationToken);
             
-        return new(player, channel, hubClient, receiver);
+        return new(player, channel, hub, receiver);
     }
     
     public async ValueTask CreateRoomAsync()
@@ -65,7 +60,7 @@ public class MatchingHub : IDisposable
     {
         public readonly Subject<Player> OnJoin = new();
         public readonly Subject<MajorityGameRoomInfo> OnJoinSelf = new();
-        public readonly Subject<Player> OnLeave = new();
+        public readonly Subject<Ulid> OnLeave = new();
             
         void IMatchingReceiver.OnJoin(Player player)
         {
@@ -79,10 +74,10 @@ public class MatchingHub : IDisposable
             OnJoinSelf.OnNext(roomInfo);
         }
 
-        void IMatchingReceiver.OnLeave(Player player)
+        void IMatchingReceiver.OnLeave(Ulid playerUlid)
         {
             // LogManager.Global.ZLogDebug($"{nameof(IMatchingReceiver.OnLeave)}");
-            OnLeave.OnNext(player);
+            OnLeave.OnNext(playerUlid);
         }
 
         public void Dispose()

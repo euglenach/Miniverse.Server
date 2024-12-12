@@ -45,10 +45,10 @@ public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Streami
         SubscribeFromNatsMessage(roomUlid);
     }
 
-    private async ValueTask SubscribeFromNatsMessage(Ulid roomUild)
+    private void SubscribeFromNatsMessage(Ulid roomUlid)
     {
         // BroadcastToSelfでOnJoinをクライアントに流す
-        nats.Subscribe<OnJoinSelfMsg>(roomUild.ToString()).ToObservable()
+        nats.Subscribe<OnJoinSelfMsg>(roomUlid.ToString()).ToObservable()
             .Subscribe(this, (msg, state) =>
             {
                 if(msg.Player is null || msg.RoomInfo is null) return;
@@ -57,8 +57,8 @@ public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Streami
                 state.logger.ZLogInformation($"Joined room:{state.roomUlid} player:{msg.Player}");
             }).RegisterTo(cancellation.Token);
         
-        // BroadcastToSelfでOnJoinをクライアントに流す
-        nats.Subscribe<OnJoinSelfMsg>(roomUild.ToString()).ToObservable()
+        // BroadcastToSelfでOnJoinSelfMsgをクライアントに流す
+        nats.Subscribe<OnJoinSelfMsg>(roomUlid.ToString()).ToObservable()
                   .Subscribe(this, (msg, state) =>
                   {
                       if(msg.Player is null || msg.RoomInfo is null) return;
@@ -66,13 +66,22 @@ public class MatchingHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Streami
                       state.BroadcastToSelf(state.room!).OnJoinSelf(msg.RoomInfo);
                       state.logger.ZLogInformation($"Joined room:{state.roomUlid} player:{msg.Player}");
                   }).RegisterTo(cancellation.Token);
+        
+        // BroadcastToSelfでOnJoinをクライアントに流す
+        nats.Subscribe<OnLeaveRoomMsg>(roomUlid.ToString()).ToObservable()
+            .Subscribe(this, (msg, state) =>
+            {
+                state.BroadcastToSelf(state.room!).OnLeave(msg.PlayerUlid);
+                state.logger.ZLogInformation($"Leaved room:{state.roomUlid} player:{msg.PlayerUlid}");
+            }).RegisterTo(cancellation.Token);
     }
 
-    protected override ValueTask OnDisconnected()
+    protected override async ValueTask OnDisconnected()
     {
+        // LogicLooperに切断を通知
+        if(player is not null) await nats.Publish(roomUlid.ToString(), new DisconnectMsg(player.Ulid));
         cancellation.Cancel();
         cancellation.Dispose();
-        return ValueTask.CompletedTask;
     }
 }
 

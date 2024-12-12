@@ -22,6 +22,13 @@ public class MajorityGameMessageReceiver(NatsPubSub nats, RoomInfoProvider roomI
             await state.JoinRoomAsync(msg.RoomUlid, msg.Player);
         }).AddTo(disposable);
         
+        // 体質を購読
+        nats.Subscribe<DisconnectMsg>(roomInfo.Ulid.ToString()).ToObservable().Subscribe((this, roomManager), static async (msg, state) =>
+        {
+            var (@this, roomManager) = state;
+            await roomManager.LeaveRoomAsync(@this.roomInfo.Ulid, msg.PlayerUlid);
+        }).AddTo(disposable);
+        
         // 質問の開始を購読
         nats.Subscribe<AskQuestionMsg>(roomInfo.Ulid.ToString()).ToObservable()
             .Select(questionService, (x, state) => (x, state))

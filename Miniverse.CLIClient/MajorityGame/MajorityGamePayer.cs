@@ -123,6 +123,6 @@ public class MajorityGamePayer : IDisposable
     {
         disposable.Dispose();
         MatchingHub.Dispose();
-        MajorityGameHub.Dispose();
+        MajorityGameHub?.Dispose();
     }
 }

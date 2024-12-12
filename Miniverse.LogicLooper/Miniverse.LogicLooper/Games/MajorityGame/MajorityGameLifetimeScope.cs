@@ -11,8 +11,5 @@ public static class MajorityGameLifetimeScope
         services.AddScoped<RoomInfoProvider>();
         services.AddScoped<QuestionService>();
         services.AddTransient<QuestionSession>();
-        
-        services.AddScoped<LooperHelper>();
-        services.AddScoped<LooperTask>();
     }
 }
