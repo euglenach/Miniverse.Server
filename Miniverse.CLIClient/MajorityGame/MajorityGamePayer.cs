@@ -59,12 +59,12 @@ public class MajorityGamePayer : IDisposable
         }).AddTo(disposable);
         
         MatchingHub.OnJoin.Subscribe(this, static (player, state) =>
-           {
-               if(state.RoomInfo is null) return;
-               state.RoomInfo.Players.Add(player);
-               state.logger.ZLogInformation($"{nameof(MatchingHub.OnJoin)}: {player.Name}");
-           })
-           .AddTo(disposable);
+        {
+            if(state.RoomInfo is null) return;
+            state.RoomInfo.Players.Add(player);
+            state.logger.ZLogInformation($"{nameof(MatchingHub.OnJoin)}: {player.Name}");
+        })
+        .AddTo(disposable);
         
         MatchingHub.OnLeave.Subscribe(this, static (playerUlid, state) =>
         {
