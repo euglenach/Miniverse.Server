@@ -65,6 +65,13 @@ public class MajorityGamePayer : IDisposable
                state.logger.ZLogInformation($"{nameof(MatchingHub.OnJoin)}: {player.Name}");
            })
            .AddTo(disposable);
+        
+        MatchingHub.OnLeave.Subscribe(this, static (playerUlid, state) =>
+        {
+            state.RoomInfo.Should().NotBeNull();
+            state.RoomInfo.Players.RemoveAll(p => p.Ulid == playerUlid);
+            state.logger.ZLogInformation($"{nameof(MatchingHub.OnLeave)}: player:{playerUlid}");
+        }).AddTo(disposable);
     }
 
     void MajorityGameEventSubscribe()
