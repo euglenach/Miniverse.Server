@@ -25,7 +25,7 @@ public class MajorityGamePayer : IDisposable
         Player = new(Ulid.NewUlid(), $"CliClient{(index == 0? "Host" : "Guest")}Player{index}");
         logger = LoggerFactory.Create(logging =>
         {
-            logging.SetMinimumLevel(LogLevel.Debug);
+            logging.SetMinimumLevel(index == 0 ? LogLevel.Debug : LogLevel.None);
             logging.AddZLoggerConsole(options => options.UsePlainTextFormatter(formatter => 
                 formatter.SetPrefixFormatter($"{0:timeonly} [{1:short}] [{2:short}] ",
                                              (in MessageTemplate template, in LogInfo info) => template.Format(info.Timestamp, info.LogLevel, Player.Ulid.ToString()))));
@@ -76,52 +76,46 @@ public class MajorityGamePayer : IDisposable
         }).AddTo(disposable);
         
         // OnAskedQuestionのイベント購読
-        MajorityGameHub.OnAskedQuestion.Subscribe(this, (x, state) =>
+        MajorityGameHub.OnAskedQuestion.Subscribe(this, (question, state) =>
         {
             Result = null;
-            var asker = state.RoomInfo!.Players.FirstOrDefault(p => p.Ulid == x.AskedPlayerUlid);
+            var asker = state.RoomInfo!.Players.FirstOrDefault(p => p.Ulid == question.AskedPlayerUlid);
             asker.Should().NotBeNull();
 
             // クライアントにもデータを反映する
-            state.RoomInfo.Question = x;
-            state.logger.ZLogInformation($"{asker!.Name}が質問を開始しました。質問文:{x.QuestionText} 選択肢:{string.Join(",", x.Choices)}");
+            state.RoomInfo.Question = question;
+            state.logger.ZLogInformation($"{asker!.Name}が質問を開始しました。質問文:{question.QuestionText} 選択肢:{string.Join(",", question.Choices)}");
         }).AddTo(disposable);
         
         // OnAskedQuestionのイベント購読
-        MajorityGameHub.OnSelected.Subscribe(this, (x, state) =>
+        MajorityGameHub.OnSelected.Subscribe(this, (args, state) =>
         {
             // (質問者だけに飛んでくるのでクライアントが判断しなくていい)
-            var answer = state.RoomInfo!.Players.FirstOrDefault(p => p.Ulid == x.AnswerPlayerUlid);
-            state.logger.ZLogInformation($"{answer.Name}が{x.Index}を選択しています... me:{state.Player.Name}");
+            var answer = state.RoomInfo!.Players.FirstOrDefault(p => p.Ulid == args.AnswerPlayerUlid);
+            state.logger.ZLogInformation($"{answer.Name}が{args.Index}を選択しています... me:{state.Player.Name}");
         }).AddTo(disposable);
         
         // OnResultのイベント購読
-        MajorityGameHub.OnResult.Subscribe(this, (x, state) =>
+        MajorityGameHub.OnResult.Subscribe(this, (result, state) =>
         {
             state.logger.ZLogInformation($"結果発表！！");
 
-            if(RoomInfo.Question.AskedPlayerUlid == Player.Ulid)
-            {
-                // var stringBuilder = ZString.CreateUtf8StringBuilder();
-                float total = x.NumTable.Sum();
+            float total = result.NumTable.Sum();
 
-                // stringBuilder.Append($"\n【結果】");
-                logger.ZLogInformation($"【結果】");
-                foreach(var (count, choice) in x.NumTable.Zip(RoomInfo.Question.Choices, (count, choice) => (count, choice))
-                                                .OrderByDescending(x => x.count))
-                {
-                    // stringBuilder.Append($"\n{choice}:{count}人...({(int)(count / total * 100)}%)");
-                    logger.ZLogInformation($"{choice}:{count}人...({(int)(count / total * 100)}%)");
-                }
-            
-                // logger.ZLogInformation($"{stringBuilder}");
+            // stringBuilder.Append($"\n【結果】");
+            logger.ZLogInformation($"【結果】");
+            foreach(var (count, choice) in result.NumTable.Zip(RoomInfo.Question.Choices, (count, choice) => (count, choice))
+                                            .OrderByDescending(x => x.count))
+            {
+                // stringBuilder.Append($"\n{choice}:{count}人...({(int)(count / total * 100)}%)");
+                logger.ZLogInformation($"{choice}:{count}人...({(int)(count / total * 100)}%)");
             }
             
-            Result = x;
-            var str = string.Join("と", x.Majorities.Select(m => state.RoomInfo!.Players.Find(x => x.Ulid == m).Name));
+            Result = result;
+            var str = string.Join("と", result.Majorities.Select(m => state.RoomInfo!.Players.Find(x => x.Ulid == m).Name));
             state.logger.ZLogInformation($"{str}がマジョリティでした！");
             if(RoomInfo.Question.AskedPlayerUlid == Player.Ulid) return;
-            state.logger.ZLogInformation($"あなたは{(x.Majorities.Contains(state.Player.Ulid)? "勝利！" : "マイノリティ！！！")} me:{state.Player.Name}");
+            state.logger.ZLogInformation($"あなたは{(result.Majorities.Contains(state.Player.Ulid)? "勝利！" : "マイノリティ！！！")} me:{state.Player.Name}");
         }).AddTo(disposable);
     }
 
