@@ -4,19 +4,37 @@ namespace Miniverse.LogicLooper.LooperTasks;
 
 public static class LogicLooperActionContextExtensions
 {
-    public static LooperTask CreateLooperTask(this LogicLooperActionContext context, LooperHelper? looperHelper = null)
+    public static LooperTask CreateLooperTask(this ILogicLooper looper, LooperHelper? looperHelper = null, LooperActionOptions? options = null)
     {
         looperHelper ??= new LooperHelper();
         var looperTask = new LooperTask(looperHelper);
-        context.Looper.RegisterActionAsync(static (in LogicLooperActionContext ctx, (LooperHelper, LogicLooperActionContext) state) =>
+        
+        looper.RegisterActionAsync(static (in LogicLooperActionContext ctx, LooperHelper helper) =>
         {
-            var (looperHelper, originContext) = state;
-            if(originContext.CancellationToken.IsCancellationRequested) return false;
             if(ctx.CancellationToken.IsCancellationRequested) return false;
             
-            looperHelper.Update(ctx);
+            helper.Update(ctx);
             return true;
-        }, (looperHelper, context));
+        }, looperHelper, options ?? LooperActionOptions.Default);
+
+        return looperTask;
+    }
+    
+    public static LooperTask CreateLooperTask(this LogicLooperActionContext context, LooperHelper? looperHelper = null, LooperActionOptions? options = null)
+    {
+        looperHelper ??= new LooperHelper();
+        var looperTask = new LooperTask(looperHelper);
+        options ??= new((int)context.Looper.TargetFrameRate);
+        
+        context.Looper.RegisterActionAsync(static (in LogicLooperActionContext ctx, (LooperHelper, LogicLooperActionContext) state) =>
+        {
+            var (helper, context) = state;
+            if(ctx.CancellationToken.IsCancellationRequested) return false;
+            if(context.CancellationToken.IsCancellationRequested) return false;
+            
+            helper.Update(ctx);
+            return true;
+        }, (looperHelper, context), options);
 
         return looperTask;
     }
