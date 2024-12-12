@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using Cysharp.Text;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Miniverse.CLIClient.StreamingHubs;
 using MiniverseShared.MessagePackObjects;
@@ -14,6 +15,7 @@ public class MajorityGamePayer : IDisposable
     public MatchingHub MatchingHub{get; private set;}
     public MajorityGameHub MajorityGameHub{get; private set;}
     public MajorityGameRoomInfo? RoomInfo{get;private set;}
+    public MajorityGameResult? Result{get;private set;}
     private readonly CompositeDisposable disposable = new();
     private readonly ILogger<MajorityGamePayer> logger;
     public bool IsConnectedMajorityGame { get; private set; }
@@ -76,6 +78,7 @@ public class MajorityGamePayer : IDisposable
         // OnAskedQuestionのイベント購読
         MajorityGameHub.OnAskedQuestion.Subscribe(this, (x, state) =>
         {
+            Result = null;
             var asker = state.RoomInfo!.Players.FirstOrDefault(p => p.Ulid == x.AskedPlayerUlid);
             asker.Should().NotBeNull();
 
@@ -95,14 +98,37 @@ public class MajorityGamePayer : IDisposable
         // OnResultのイベント購読
         MajorityGameHub.OnResult.Subscribe(this, (x, state) =>
         {
-            var str = string.Join("と", x.Majorities.Select(m => state.RoomInfo!.Players.Find(x => x.Ulid == m)));
+            state.logger.ZLogInformation($"結果発表！！");
+
+            if(RoomInfo.Question.AskedPlayerUlid == Player.Ulid)
+            {
+                // var stringBuilder = ZString.CreateUtf8StringBuilder();
+                float total = x.NumTable.Sum();
+
+                // stringBuilder.Append($"\n【結果】");
+                logger.ZLogInformation($"【結果】");
+                foreach(var (count, choice) in x.NumTable.Zip(RoomInfo.Question.Choices, (count, choice) => (count, choice))
+                                                .OrderByDescending(x => x.count))
+                {
+                    // stringBuilder.Append($"\n{choice}:{count}人...({(int)(count / total * 100)}%)");
+                    logger.ZLogInformation($"{choice}:{count}人...({(int)(count / total * 100)}%)");
+                }
+            
+                // logger.ZLogInformation($"{stringBuilder}");
+            }
+            
+            Result = x;
+            var str = string.Join("と", x.Majorities.Select(m => state.RoomInfo!.Players.Find(x => x.Ulid == m).Name));
             state.logger.ZLogInformation($"{str}がマジョリティでした！");
-            state.logger.ZLogInformation($"あなたは{(x.Majorities.Contains(state.Player.Ulid)? "敗北..." : "勝利！")} me:{state.Player.Name}");
+            if(RoomInfo.Question.AskedPlayerUlid == Player.Ulid) return;
+            state.logger.ZLogInformation($"あなたは{(x.Majorities.Contains(state.Player.Ulid)? "勝利！" : "マイノリティ！！！")} me:{state.Player.Name}");
         }).AddTo(disposable);
     }
 
     public void Dispose()
     {
         disposable.Dispose();
+        MatchingHub.Dispose();
+        MajorityGameHub.Dispose();
     }
 }

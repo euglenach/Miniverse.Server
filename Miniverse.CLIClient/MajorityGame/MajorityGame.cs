@@ -66,32 +66,26 @@ public class MajorityGame
         var choices = new[]{"犬", "猫", "うさぎ", "虚無"};
         await host.MajorityGameHub.AskQuestion("飼うなら？", choices);
         
-        // 全員に質問がくるか確認
+        // 全員に質問が受信されるか確認
         (await Wait.Until(() => majorityGamePayers.All(p => p.RoomInfo!.Question is not null), cancellationToken : cancellationToken)).Should().BeTrue();
 
         foreach(var guest in guests)
         {
             // ランダムで1つ選択させる
-            await guest.MajorityGameHub.Select(Random.Shared.Next(choices.Length));
+            guest.MajorityGameHub.Select(Random.Shared.Next(choices.Length)).Forget();
             
             // ホストだけに届く通知を待機
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(2000);
-            await host.MajorityGameHub.OnSelected.Where(guest, static (x, g) => x.AnswerPlayerUlid == g.Player.Ulid)
-                      .FirstAsync(cts.Token);
+            await host.MajorityGameHub.OnSelected.Where(guest, static (x, g) => x.AnswerPlayerUlid == g.Player.Ulid).FirstAsync(cancellationToken : cts.Token);
         }
 
         // ちょっと待ってから結果発表
-        await Task.Delay(2000, cancellationToken);
+        await Task.Delay(1000, cancellationToken);
         host.MajorityGameHub.ResultOpen().Forget();
         
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(2000);
-        
         // リザルトが来るのを待つ
-        await ValueTaskEx.WhenAll(
-            majorityGamePayers.Select(p => p.MajorityGameHub.OnResult.FirstAsync(timeout.Token).AsValueTask())
-        );
+        (await Wait.Until(() => majorityGamePayers.All(p => p.Result is not null), cancellationToken : cancellationToken)).Should().BeTrue();
         
         LogManager.Global.ZLogInformation($"Complete MajorityGame!!");
     }

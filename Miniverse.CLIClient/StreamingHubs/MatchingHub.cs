@@ -9,7 +9,7 @@ using ZLogger;
 
 namespace Miniverse.CLIClient.StreamingHubs;
 
-public class MatchingHub
+public class MatchingHub : IDisposable
 {
     private readonly Player player;
     private readonly GrpcChannel channel;
@@ -56,11 +56,12 @@ public class MatchingHub
     
     public async void Dispose()
     {
+        receiver.Dispose();
         await channel.ShutdownAsync();
         await matchingHub.DisposeAsync();
     }
 
-    private class MatchingReceiver : IMatchingReceiver
+    private class MatchingReceiver : IMatchingReceiver, IDisposable
     {
         public readonly Subject<Player> OnJoin = new();
         public readonly Subject<MajorityGameRoomInfo> OnJoinSelf = new();
@@ -82,6 +83,13 @@ public class MatchingHub
         {
             // LogManager.Global.ZLogDebug($"{nameof(IMatchingReceiver.OnLeave)}");
             OnLeave.OnNext(player);
+        }
+
+        public void Dispose()
+        {
+            OnJoin.Dispose();
+            OnJoinSelf.Dispose();
+            OnLeave.Dispose();
         }
     }
 }

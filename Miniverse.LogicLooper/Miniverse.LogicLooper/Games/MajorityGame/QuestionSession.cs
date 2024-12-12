@@ -24,6 +24,7 @@ public class QuestionSession
         if(index < 0 || Choices.Length <= index) return false;
         if(!selectedTable.TryAdd(playerUlid, index))
         {
+            if(selectedTable[playerUlid] == index) return false;
             selectedTable[playerUlid] = index;
         }
 

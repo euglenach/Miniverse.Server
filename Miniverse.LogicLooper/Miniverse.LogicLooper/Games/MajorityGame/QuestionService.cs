@@ -5,6 +5,7 @@ using Miniverse.ServerShared.Utility;
 using MiniverseShared.MessagePackObjects;
 using MiniverseShared.Utility;
 using R3;
+using ZLogger;
 
 namespace Miniverse.LogicLooperServer;
 
@@ -53,6 +54,7 @@ public class QuestionService(IServiceProvider serviceProvider, ILogger<QuestionS
         // MagicOnionに送る
         var data = new MajorityGameQuestion(playerUlid, questionText, choices);
         await nats.Publish(roomInfo.Ulid.ToString(), new OnAskedQuestionMsg(data));
+        logger.ZLogInformation($"質問が開始されました。player:{playerUlid}");
     }
 
     public async ValueTask Select(Ulid playerUlid, int index)
@@ -71,6 +73,7 @@ public class QuestionService(IServiceProvider serviceProvider, ILogger<QuestionS
 
         // 選択をMagicOnionに送る(カリング用に質問者のIDも送る)
         await nats.Publish(roomInfo.Ulid.ToString(), new OnSelectedMsg(session.PlayerUlid, playerUlid, index));
+        logger.ZLogInformation($"{playerUlid}が{index}を選択しました。");
     }
 
     public async ValueTask ResultOpen(Ulid playerUlid)
@@ -100,5 +103,6 @@ public class QuestionService(IServiceProvider serviceProvider, ILogger<QuestionS
         
         // 結果をMagicOnionに送る
         await nats.Publish(roomInfo.Ulid.ToString(), new OnResultMsg(data));
+        logger.ZLogInformation($"結果が出ました。{data}");
     }
 }

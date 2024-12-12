@@ -33,7 +33,7 @@ public class MajorityGameHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Str
     public async ValueTask ResultOpen()
     {
         await nats.Publish(roomUlid.ToString(), new ResultOpenMsg(playerUlid));
-        logger.LogInformation($"{nameof(Select)} ResultOpen:{playerUlid}");
+        logger.LogInformation($"{nameof(ResultOpen)} ResultOpen:{playerUlid}");
     }
 
     void EventSubscribe()
@@ -44,6 +44,7 @@ public class MajorityGameHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Str
             {
                 if(msg.Question is null) return;
                 state.BroadcastToSelf(state.room!).OnAskedQuestion(msg.Question);
+                state.logger.LogInformation($"{nameof(OnAskedQuestionMsg)}: Question:{msg}");
             }).RegisterTo(cancellation.Token);
         
         // 選択された通知
@@ -55,6 +56,7 @@ public class MajorityGameHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Str
                 // 質問者にしか返さない
                 if(msg.TargetUlid != state.playerUlid) return;
                 state.BroadcastToSelf(state.room!).OnSelected(msg.SelectedPlayerUlid, msg.Index);
+                state.logger.LogInformation($"{nameof(OnSelectedMsg)}: Selected:{msg}");
             }).RegisterTo(cancellation.Token);
         
         // 結果された通知
@@ -63,6 +65,7 @@ public class MajorityGameHub(ILogger<MatchingHub> logger, NatsPubSub nats) : Str
             {
                 if(msg.Result is null) return;
                 state.BroadcastToSelf(state.room!).OnResult(msg.Result);
+                state.logger.LogInformation($"{nameof(OnResultMsg)}: Result:{msg}");
             }).RegisterTo(cancellation.Token);
     }
     

@@ -5,7 +5,7 @@ using R3;
 
 namespace Miniverse.CLIClient.StreamingHubs;
 
-public class MajorityGameHub
+public class MajorityGameHub : IDisposable
 {
     private readonly Player player;
     private readonly GrpcChannel channel;
@@ -42,7 +42,7 @@ public class MajorityGameHub
     public async ValueTask ResultOpen()
     {
         await hub.ResultOpen();
-    } 
+    }
     
     public static async ValueTask<MajorityGameHub> CreateAsync(Player player, Ulid roomUlid, CancellationToken cancellationToken = default)
     {
@@ -51,7 +51,7 @@ public class MajorityGameHub
         return new(player, channel, hub, receiver);
     }
 
-    private class MajorityGameReceiver : IMajorityGameReceiver
+    private class MajorityGameReceiver : IMajorityGameReceiver, IDisposable
     {
         public readonly Subject<Unit> OnConnected = new();
         public readonly Subject<MajorityGameQuestion> OnAskedQuestion = new();
@@ -77,5 +77,21 @@ public class MajorityGameHub
         {
             OnResult.OnNext(result);
         }
+
+        public void Dispose()
+        {
+            OnConnected.Dispose();
+            OnAskedQuestion.Dispose();
+            OnSelected.Dispose();
+            OnResult.Dispose();
+        }
+    }
+
+    public async void Dispose()
+    {
+        channel.Dispose();
+        receiver.Dispose();
+        await channel.ShutdownAsync();
+        await hub.DisposeAsync();
     }
 }

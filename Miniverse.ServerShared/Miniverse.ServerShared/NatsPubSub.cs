@@ -26,7 +26,7 @@ public class NatsPubSub : IAsyncDisposable
     public ValueTask Publish<T>(string key, T value, CancellationToken cancellationToken = default)
     {
         if(connectionPool is null) throw new InvalidOperationException("No connection pool available.");
-        return connectionPool.GetConnection().PublishAsync(key, value, cancellationToken : cancellationToken);
+        return connectionPool.GetConnection().PublishAsync(key + typeof(T).FullName, value, cancellationToken : cancellationToken);
     }
     
     public ValueTask Publish<T>(T value, CancellationToken cancellationToken = default)
@@ -37,7 +37,7 @@ public class NatsPubSub : IAsyncDisposable
     public async IAsyncEnumerable<T> Subscribe<T>(string key, CancellationToken cancellationToken = default)
     {
         if(connectionPool is null) throw new InvalidOperationException("No connection pool available.");
-        await foreach(var msg in connectionPool.GetConnection().SubscribeAsync<T>(key, cancellationToken : cancellationToken))
+        await foreach(var msg in connectionPool.GetConnection().SubscribeAsync<T>(key + typeof(T).FullName, cancellationToken : cancellationToken))
         {
             yield return msg.Data!;
         }
