@@ -7,7 +7,7 @@ using ZLogger;
 
 namespace Miniverse.CLIClient;
 
-public class MajorityGame
+public class MajorityGameRunner
 {
     public async ValueTask Run(CancellationToken cancellationToken = default)
     {

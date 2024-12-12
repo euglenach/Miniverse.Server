@@ -6,6 +6,6 @@ using ZLogger;
 
 MessagePackOptionRegister.Register();
 
-var test = new MajorityGame();
+var test = new MajorityGameRunner();
 
 await test.Run();
